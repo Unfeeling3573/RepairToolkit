@@ -3,11 +3,15 @@ name: Build Windows EXE
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # Permet de relancer la compilation manuellement
+  workflow_dispatch:
+
+# Ajout de cette variable pour forcer l'utilisation de Node.js 24 et retirer l'avertissement
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
-    runs-on: windows-latest # Demande un PC Windows dans le cloud
+    runs-on: windows-latest
 
     steps:
     - name: Récupération du code
@@ -16,7 +20,7 @@ jobs:
     - name: Installation de Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11' # Version très stable
+        python-version: '3.11'
 
     - name: Installation des librairies
       run: |
