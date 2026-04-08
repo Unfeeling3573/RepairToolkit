@@ -10,6 +10,7 @@ from datetime import datetime
 import urllib.request
 import json
 import webbrowser
+from fpdf import FPDF
 
 # Importation conditionnelle pour éviter que le code ne crashe sur Mac
 if platform.system() == "Windows":
@@ -435,11 +436,41 @@ class RepairApp(ctk.CTk):
         self.log_message("Console effacée.\n" + "="*70, "info")
 
     def export_report(self, event=None):
-        file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Fichier Texte", "*.txt")], title="Sauvegarder le rapport", initialfile=f"Rapport_RepairToolkit_{datetime.now().strftime('%Y%m%d')}.txt")
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf",
+            filetypes=[("Fichier PDF", "*.pdf"), ("Fichier Texte", "*.txt")],
+            title="Sauvegarder le rapport",
+            initialfile=f"Rapport_RepairToolkit_{datetime.now().strftime('%Y%m%d')}"
+        )
         if file_path:
             try:
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(self.console_textbox.get("1.0", "end"))
+                content = self.console_textbox.get("1.0", "end")
+
+                if file_path.endswith(".pdf"):
+                    # Création du document PDF
+                    pdf = FPDF()
+                    pdf.add_page()
+
+                    # En-tête
+                    pdf.set_font("Arial", 'B', 16)
+                    pdf.cell(0, 10, "Windows Repair Toolkit - Rapport d'intervention", ln=True, align='C')
+                    pdf.ln(10)
+
+                    # Corps du texte (Police type "machine à écrire" pour les logs)
+                    pdf.set_font("Courier", size=10)
+
+                    # FPDF standard ne gère pas les emojis, on les retire proprement pour le PDF
+                    clean_content = content.encode('latin-1', 'ignore').decode('latin-1')
+
+                    for line in clean_content.split('\n'):
+                        pdf.multi_cell(0, 5, txt=line)
+
+                    pdf.output(file_path)
+                else:
+                    # Sauvegarde texte classique si l'utilisateur choisit .txt
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        f.write(content)
+
                 messagebox.showinfo("Succès", "Rapport exporté avec succès !")
             except Exception as e:
                 messagebox.showerror("Erreur", f"Impossible de sauvegarder le rapport : {e}")
