@@ -57,9 +57,11 @@ jobs:
       - name: Compilation en .app (Mac)
         run: |
           pyinstaller --noconsole --windowed --name "Mac_Repair_Toolkit" main.py
+          cd dist
+          zip -r Mac_Repair_Toolkit.zip Mac_Repair_Toolkit.app
 
       - name: Mise à disposition de l'application Mac
         uses: actions/upload-artifact@v4
         with:
           name: Mon_Logiciel_Mac
-          path: dist/Mac_Repair_Toolkit.app
+          path: dist/Mac_Repair_Toolkit.zip
