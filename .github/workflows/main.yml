@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 # Ajout de cette variable pour forcer l'utilisation de Node.js 24 et retirer l'avertissement
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
