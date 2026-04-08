@@ -7,6 +7,9 @@ import os
 import tkinter.messagebox as messagebox
 import tkinter.filedialog as filedialog
 from datetime import datetime
+import urllib.request
+import json
+import webbrowser
 
 # Importation conditionnelle pour éviter que le code ne crashe sur Mac
 if platform.system() == "Windows":
@@ -276,6 +279,10 @@ class SystemRepairManager:
         except Exception as e:
             return f"Erreur : {str(e)}"
 
+# --- Configuration de l'application ---
+APP_VERSION = "1.0"
+UPDATE_URL = "https://api.github.com/repos/Unfeeling3573/RepairToolkit/releases/latest" # Remplacer TON_PSEUDO par ton vrai pseudo GitHub
+
 # --- 2. Interface Graphique (Le Frontend) ---
 class RepairApp(ctk.CTk):
     def __init__(self):
@@ -314,10 +321,13 @@ class RepairApp(ctk.CTk):
         self.btn_export_log = ctk.CTkButton(self.sidebar_frame, text="💾 Exporter Rapport", command=self.export_report, fg_color="transparent", border_width=1, text_color=("gray10", "#DCE4EE"))
         self.btn_export_log.grid(row=3, column=0, padx=20, pady=10)
 
+        self.btn_update = ctk.CTkButton(self.sidebar_frame, text="🔄 Mises à jour", command=self.check_update, fg_color="transparent", border_width=1, text_color=("gray10", "#DCE4EE"))
+        self.btn_update.grid(row=4, column=0, padx=20, pady=10)
+
         # Indicateur de version
-        self.version_label = ctk.CTkLabel(self.sidebar_frame, text="v1.0 Pro Edition", font=ctk.CTkFont(size=10), text_color="#555555")
-        self.version_label.grid(row=5, column=0, pady=20, sticky="s")
-        self.sidebar_frame.grid_rowconfigure(4, weight=1)
+        self.version_label = ctk.CTkLabel(self.sidebar_frame, text=f"v{APP_VERSION} Pro Edition", font=ctk.CTkFont(size=10), text_color="#555555")
+        self.version_label.grid(row=6, column=0, pady=20, sticky="s")
+        self.sidebar_frame.grid_rowconfigure(5, weight=1)
 
         # Raccourcis clavier (UX)
         self.bind("<Control-l>", self.clear_logs)
@@ -433,6 +443,30 @@ class RepairApp(ctk.CTk):
                 messagebox.showinfo("Succès", "Rapport exporté avec succès !")
             except Exception as e:
                 messagebox.showerror("Erreur", f"Impossible de sauvegarder le rapport : {e}")
+
+    def check_update(self):
+        """Vérifie si une nouvelle version est disponible sur GitHub."""
+        self.log_message("Recherche de mises à jour en cours...", "info")
+        self.btn_update.configure(state="disabled")
+
+        def thread_target():
+            try:
+                req = urllib.request.Request(UPDATE_URL, headers={'User-Agent': 'RepairToolkit'})
+                with urllib.request.urlopen(req, timeout=5) as response:
+                    data = json.loads(response.read().decode())
+                    latest_version = data.get("tag_name", "").replace("v", "")
+
+                    if latest_version and latest_version != APP_VERSION:
+                        if messagebox.askyesno("Mise à jour disponible", f"La version {latest_version} est disponible !\n\nVous utilisez actuellement la version {APP_VERSION}.\nVoulez-vous ouvrir la page de téléchargement ?"):
+                            webbrowser.open(data.get("html_url", ""))
+                            self.log_message(f"Ouverture du navigateur pour télécharger la v{latest_version}.", "success")
+                    else:
+                        self.log_message("Vous utilisez déjà la dernière version disponible.", "success")
+            except Exception as e:
+                self.log_message("Impossible de vérifier les mises à jour. Le repo est-il public ?", "error")
+            self.btn_update.configure(state="normal")
+
+        threading.Thread(target=thread_target, daemon=True).start()
 
     # --- 3. Mécanisme global d'exécution asynchrone (Refonte) ---
     def run_async_task(self, button, task_func, start_msg):

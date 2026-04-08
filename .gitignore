@@ -1,0 +1,14 @@
+# Environnements virtuels
+.venv/
+venv/
+env/
+
+# Dossiers de compilation PyInstaller
+build/
+dist/
+*.spec
+*.exe
+
+# Cache Python et logs locaux
+__pycache__/
+repair_history.log

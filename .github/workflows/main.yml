@@ -2,7 +2,7 @@ name: Build Windows EXE
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 # Ajout de cette variable pour forcer l'utilisation de Node.js 24 et retirer l'avertissement
@@ -14,26 +14,25 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Récupération du code
-      uses: actions/checkout@v4
+      - name: Récupération du code
+        uses: actions/checkout@v4
 
-    - name: Installation de Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+      - name: Installation de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-    - name: Installation des librairies
-      run: |
-        python -m pip install --upgrade pip
-        pip install customtkinter pyinstaller
+      - name: Installation des librairies
+        run: |
+          python -m pip install --upgrade pip
+          pip install customtkinter pyinstaller
 
-    - name: Compilation en .exe
-      run: |
-        pyinstaller --noconsole --onefile --uac-admin --icon=logo.ico main.py
-        Rename-Item -Path "dist\main.exe" -NewName "Windows_Repair_Toolkit.exe"
+      - name: Compilation en .exe
+        run: |
+          pyinstaller --noconsole --onedir --uac-admin --icon=logo.ico --name "Windows_Repair_Toolkit" main.py
 
-    - name: Mise à disposition du fichier .exe
-      uses: actions/upload-artifact@v4
-      with:
-        name: Mon_Logiciel_Windows
-        path: dist/Windows_Repair_Toolkit.exe
+      - name: Mise à disposition du dossier du logiciel
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mon_Logiciel_Windows
+          path: dist/Windows_Repair_Toolkit
