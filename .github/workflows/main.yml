@@ -2,7 +2,7 @@ name: Build Windows EXE
 
 on:
   push:
-    branches: [main, v2-dev]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

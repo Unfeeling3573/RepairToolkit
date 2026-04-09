@@ -15,7 +15,7 @@ import ssl
 from backend import SystemRepairManager
 
 # --- Configuration de l'application ---
-APP_VERSION = "2.0-dev10"
+APP_VERSION = "2.0.10"
 
 # --- Interface Gestionnaire de Quarantaine ---
 class QuarantineManagerWindow(ctk.CTkToplevel):
@@ -449,7 +449,7 @@ class RepairApp(ctk.CTk):
                 ssl_context.verify_mode = ssl.CERT_NONE
 
                 # Lecture directe du code source sur GitHub (mis à jour pour pointer vers gui.py)
-                RAW_URL = f"https://raw.githubusercontent.com/Unfeeling3573/RepairToolkit/v2-dev/gui.py?nocache={int(time.time())}"
+                RAW_URL = f"https://raw.githubusercontent.com/Unfeeling3573/RepairToolkit/main/gui.py?nocache={int(time.time())}"
                 req = urllib.request.Request(RAW_URL, headers={'User-Agent': 'RepairToolkit'})
 
                 with urllib.request.urlopen(req, timeout=8, context=ssl_context) as response:
@@ -522,7 +522,7 @@ class RepairApp(ctk.CTk):
                 if not os.path.exists("langs"):
                     os.makedirs("langs")
 
-                url = f"https://raw.githubusercontent.com/Unfeeling3573/RepairToolkit/v2-dev/langs/{lang_code}.json?nocache={int(time.time())}"
+                url = f"https://raw.githubusercontent.com/Unfeeling3573/RepairToolkit/main/langs/{lang_code}.json?nocache={int(time.time())}"
                 ssl_context = ssl.create_default_context()
                 ssl_context.check_hostname = False
                 ssl_context.verify_mode = ssl.CERT_NONE
