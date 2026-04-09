@@ -280,8 +280,54 @@ class SystemRepairManager:
         except Exception as e:
             return f"Erreur : {str(e)}"
 
+    def reset_network(self) -> str:
+        if not self.is_windows:
+            time.sleep(2)
+            return "[Mac Mode] Simulation : Carte réseau réinitialisée (Winsock/IP)."
+        try:
+            res1 = self.execute_command(["netsh", "winsock", "reset"])
+            self.execute_command(["ipconfig", "/renew"])
+            return f"🌐 Réseau réinitialisé avec succès.\n{res1}\n(Un redémarrage peut être nécessaire)"
+        except Exception as e:
+            return f"Erreur lors de la réinitialisation réseau : {str(e)}"
+
+    def get_detailed_sysinfo(self) -> str:
+        if not self.is_windows:
+            time.sleep(1)
+            return "[Mac Mode] Simulation :\nCarte Mère : Apple M-Series\nGPU : Apple Silicon 16-core"
+        try:
+            mobo = self.execute_command(["powershell", "-Command", "(Get-WmiObject win32_baseboard).Product"]).strip()
+            gpu = self.execute_command(["powershell", "-Command", "(Get-WmiObject win32_VideoController).Name"]).strip()
+            return f"📊 Informations Détaillées :\nCarte Mère : {mobo}\nCarte Graphique : {gpu}"
+        except Exception as e:
+            return f"Erreur lors de la récupération des infos : {str(e)}"
+
+    def disable_telemetry(self) -> str:
+        if not self.is_windows:
+            time.sleep(2)
+            return "[Mac Mode] Simulation : Télémétrie et collecte de données désactivées."
+        try:
+            # Désactiver le service de télémétrie Windows
+            self.execute_command(["sc", "config", "DiagTrack", "start=", "disabled"])
+            self.execute_command(["sc", "stop", "DiagTrack"])
+            # Clé de registre pour bloquer la télémétrie
+            self.execute_command(["reg", "add", "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection", "/v", "AllowTelemetry", "/t", "REG_DWORD", "/d", "0", "/f"])
+            return "🛑 Télémétrie Windows désactivée avec succès (Service DiagTrack arrêté)."
+        except Exception as e:
+            return f"Erreur lors de la désactivation de la télémétrie : {str(e)}"
+
+    def disable_background_apps(self) -> str:
+        if not self.is_windows:
+            time.sleep(1)
+            return "[Mac Mode] Simulation : Applications en arrière-plan bloquées."
+        try:
+            self.execute_command(["reg", "add", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications", "/v", "GlobalUserDisabled", "/t", "REG_DWORD", "/d", "1", "/f"])
+            return "🛑 Exécution des applications en arrière-plan désactivée pour économiser les ressources."
+        except Exception as e:
+            return f"Erreur lors de la désactivation des apps en arrière-plan : {str(e)}"
+
 # --- Configuration de l'application ---
-APP_VERSION = "2.0-dev"
+APP_VERSION = "2.0-dev1"
 UPDATE_URL = "https://api.github.com/repos/Unfeeling3573/RepairToolkit/releases/latest" # Remplacer TON_PSEUDO par ton vrai pseudo GitHub
 
 # --- 2. Interface Graphique (Le Frontend) ---
@@ -325,10 +371,15 @@ class RepairApp(ctk.CTk):
         self.btn_update = ctk.CTkButton(self.sidebar_frame, text="🔄 Mises à jour", command=self.check_update, fg_color="transparent", border_width=1, text_color=("gray10", "#DCE4EE"))
         self.btn_update.grid(row=4, column=0, padx=20, pady=10)
 
+        # Switch Thème Clair/Sombre
+        self.appearance_mode_switch = ctk.CTkSwitch(self.sidebar_frame, text="Mode Sombre", command=self.change_appearance_mode_event)
+        self.appearance_mode_switch.grid(row=5, column=0, padx=20, pady=20)
+        self.appearance_mode_switch.select() # Coché par défaut (Sombre)
+
         # Indicateur de version
         self.version_label = ctk.CTkLabel(self.sidebar_frame, text=f"v{APP_VERSION} Pro Edition", font=ctk.CTkFont(size=10), text_color="#555555")
-        self.version_label.grid(row=6, column=0, pady=20, sticky="s")
-        self.sidebar_frame.grid_rowconfigure(5, weight=1)
+        self.version_label.grid(row=7, column=0, pady=20, sticky="s")
+        self.sidebar_frame.grid_rowconfigure(6, weight=1)
 
         # Raccourcis clavier (UX)
         self.bind("<Control-l>", self.clear_logs)
@@ -339,12 +390,14 @@ class RepairApp(ctk.CTk):
         self.tabview.grid(row=0, column=1, padx=20, pady=(10, 5), sticky="nsew")
 
         self.tab_sys = self.tabview.add("🛠️ Système")
+        self.tab_opti = self.tabview.add("⚡ Optimisation")
         self.tab_sec = self.tabview.add("🛡️ Sécurité")
         self.tab_net = self.tabview.add("🌐 Réseau & Nettoyage")
         self.tab_utils = self.tabview.add("🧰 Utilitaires")
 
         # Layout des onglets
         self.tab_sys.grid_columnconfigure((0, 1, 2), weight=1)
+        self.tab_opti.grid_columnconfigure((0, 1), weight=1)
         self.tab_sec.grid_columnconfigure((0, 1, 2), weight=1)
         self.tab_net.grid_columnconfigure((0, 1), weight=1)
         self.tab_utils.grid_columnconfigure((0, 1), weight=1)
@@ -354,6 +407,9 @@ class RepairApp(ctk.CTk):
         self.btn_dism = self.create_action_card(self.tab_sys, 0, 1, "2. Réparer Image (DISM)", "Répare l'image système globale de Windows via Windows Update.", self.start_dism_scan)
         self.btn_restore = self.create_action_card(self.tab_sys, 0, 2, "3. Point Restauration", "Crée une sauvegarde système (recommandé avant réparation).", self.start_restore_point)
         self.btn_explorer = self.create_action_card(self.tab_sys, 1, 0, "Réparer Explorateur", "Redémarre l'explorateur Windows (Menu Démarrer bloqué, icônes invisibles).", self.start_repair_explorer, colspan=3)
+
+        self.btn_telemetry = self.create_action_card(self.tab_opti, 0, 0, "Désactiver Télémétrie", "Bloque la collecte de données et le pistage par Microsoft (DiagTrack).", self.start_disable_telemetry, "#2C3E50", "#1A252F")
+        self.btn_bg_apps = self.create_action_card(self.tab_opti, 0, 1, "Bloquer Apps Arrière-plan", "Empêche les applications inutiles de tourner en tâche de fond.", self.start_disable_background_apps, "#2C3E50", "#1A252F")
 
         self.btn_malware = self.create_action_card(self.tab_sec, 0, 0, "Scan Malware", "Recherche des scripts et exécutables cachés dans Temp et Downloads.", self.start_malware_scan, "#8B0000", "#5C0000")
         self.btn_pdf_trace = self.create_action_card(self.tab_sec, 0, 1, "Traces PDF Vérolé", "Détecte les doubles extensions et les faux PDF laissés par les virus.", self.start_pdf_trace_scan, "#8B0000", "#5C0000")
@@ -367,9 +423,12 @@ class RepairApp(ctk.CTk):
         self.btn_temp = self.create_action_card(self.tab_net, 1, 0, "Nettoyage Temp", "Libère de l'espace disque en supprimant les fichiers temporaires inutiles.", self.start_clean_temp)
         self.btn_downloads = self.create_action_card(self.tab_net, 1, 1, "Vider Téléchargements", "Supprime définitivement le contenu du dossier Téléchargements.", self.start_clean_downloads)
 
+        self.btn_net_reset = self.create_action_card(self.tab_net, 2, 0, "Réinitialiser Réseau", "Renouvelle l'adresse IP et réinitialise la carte réseau (Winsock).", self.start_network_reset, colspan=2)
+
         self.btn_license = self.create_action_card(self.tab_utils, 0, 0, "Clé de Licence", "Récupère la clé de produit Windows originale intégrée à la carte mère.", self.start_license_check)
         self.btn_disk = self.create_action_card(self.tab_utils, 0, 1, "Santé des Disques", "Vérifie l'état de santé S.M.A.R.T de vos disques durs et SSD.", self.start_disk_check)
         self.btn_battery = self.create_action_card(self.tab_utils, 1, 0, "Rapport Batterie", "Génère un rapport HTML complet sur l'état et l'usure de votre batterie.", self.start_battery_report, colspan=2)
+        self.btn_sysinfo = self.create_action_card(self.tab_utils, 2, 0, "Infos Système", "Affiche des informations matérielles détaillées (Carte Mère, GPU).", self.start_detailed_sysinfo, colspan=2)
 
         # -- Zone de Statut et Barre de Progression (Nouvelle Feature UX) --
         self.status_frame = ctk.CTkFrame(self, height=30, fg_color="transparent")
@@ -531,6 +590,12 @@ class RepairApp(ctk.CTk):
         threading.Thread(target=thread_target, daemon=True).start()
 
     # --- Lancement des tâches ---
+    def change_appearance_mode_event(self):
+        if self.appearance_mode_switch.get() == 1:
+            ctk.set_appearance_mode("dark")
+        else:
+            ctk.set_appearance_mode("light")
+
     def start_sfc_scan(self):
         self.run_async_task(self.btn_sfc, self.repair_manager.run_sfc_scan, "Démarrage du scan SFC (Vérification des fichiers système)...")
 
@@ -577,6 +642,19 @@ class RepairApp(ctk.CTk):
 
     def start_hosts_restore(self):
         self.run_async_task(self.btn_hosts, self.repair_manager.check_and_restore_hosts, "Restauration du fichier HOSTS de Windows...")
+
+    def start_network_reset(self):
+        self.run_async_task(self.btn_net_reset, self.repair_manager.reset_network, "Réinitialisation matérielle de la carte réseau...")
+
+    def start_detailed_sysinfo(self):
+        self.run_async_task(self.btn_sysinfo, self.repair_manager.get_detailed_sysinfo, "Analyse du matériel en cours...")
+
+    def start_disable_telemetry(self):
+        if messagebox.askyesno("Optimisation", "Désactiver la télémétrie bloquera l'envoi de vos données de diagnostic à Microsoft.\n\nVoulez-vous continuer ?"):
+            self.run_async_task(self.btn_telemetry, self.repair_manager.disable_telemetry, "Désactivation de la télémétrie Windows (DiagTrack)...")
+
+    def start_disable_background_apps(self):
+        self.run_async_task(self.btn_bg_apps, self.repair_manager.disable_background_apps, "Désactivation globale des applications en arrière-plan...")
 
 # Point d'entrée de l'application
 if __name__ == "__main__":
