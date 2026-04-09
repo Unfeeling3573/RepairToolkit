@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Repair Toolkit - Édition Pro</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #2C3E50;
+            --text-main: #DCE4EE;
+            --text-muted: #AAAAAA;
+            --accent: #5DADE2;
+            --success: #2ECC71;
+            --danger: #E74C3C;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            padding: 100px 20px 60px;
+            background: linear-gradient(180deg, #11111f 0%, var(--bg-color) 100%);
+            border-bottom: 1px solid #333;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .btn-download {
+            display: inline-block;
+            background-color: var(--success);
+            color: #111;
+            text-decoration: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.5);
+            background-color: #27AE60;
+        }
+
+        .btn-github {
+            display: inline-block;
+            margin-left: 15px;
+            background-color: transparent;
+            color: var(--text-main);
+            border: 2px solid #555;
+            text-decoration: none;
+            padding: 13px 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-github:hover {
+            border-color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #3a4b5c;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            border-top: 1px solid #333;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🛠️ Windows Repair Toolkit</h1>
+        <p class="subtitle">L'utilitaire système tout-en-un doté d'une interface graphique moderne. Diagnostiquez, nettoyez, optimisez et réparez votre PC Windows en un seul clic.</p>
+        <a href="https://github.com/Unfeeling3573/RepairToolkit/releases/latest" class="btn-download">⬇️ Télécharger la V2 (Gratuit)</a>
+        <a href="https://github.com/Unfeeling3573/RepairToolkit" class="btn-github">Code Source (GitHub)</a>
+    </header>
+
+    <section class="features">
+        <div class="card">
+            <h3>⚡ Optimisation & Anti-Télémétrie</h3>
+            <p>Reprenez le contrôle de votre vie privée. Désactivez la télémétrie Microsoft, bloquez les applications en arrière-plan et arrêtez OneDrive proprement pour libérer de la RAM.</p>
+        </div>
+        <div class="card">
+            <h3>📦 Catalogue Winget Intégré</h3>
+            <p>Fini les installeurs manuels ! Sélectionnez vos logiciels favoris (Chrome, VLC, Discord...) et l'outil s'occupe de les télécharger et les installer silencieusement en arrière-plan.</p>
+        </div>
+        <div class="card">
+            <h3>🛡️ Sécurité & Kill Switch</h3>
+            <p>Isolez les malwares grâce au scanner de fichiers suspects (scripts, faux PDF) et purgez instantanément les processus dangereux en mémoire grâce au bouton d'arrêt d'urgence.</p>
+        </div>
+    </section>
+</body>
+</html>
