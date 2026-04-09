@@ -281,7 +281,7 @@ class SystemRepairManager:
             return f"Erreur : {str(e)}"
 
 # --- Configuration de l'application ---
-APP_VERSION = "1.0"
+APP_VERSION = "2.0-dev"
 UPDATE_URL = "https://api.github.com/repos/Unfeeling3573/RepairToolkit/releases/latest" # Remplacer TON_PSEUDO par ton vrai pseudo GitHub
 
 # --- 2. Interface Graphique (Le Frontend) ---
