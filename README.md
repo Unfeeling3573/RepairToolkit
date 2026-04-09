@@ -1,5 +1,8 @@
 # 🛠️ Windows Repair Toolkit - Édition Pro
 
+[![🇬🇧 English](https://img.shields.io/badge/Language-English-blue?style=for-the-badge)](README_en.md)
+[![🇫🇷 Français](https://img.shields.io/badge/Langue-Français-red?style=for-the-badge)](README.md)
+
 ![Python Version](https://img.shields.io/badge/Python-3.11-blue.svg)
 ![OS](https://img.shields.io/badge/OS-Windows%20%7C%20macOS%20(Simulé)-lightgrey.svg)
 ![Build](https://img.shields.io/badge/Build-GitHub%20Actions-success.svg)
