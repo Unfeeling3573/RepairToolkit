@@ -494,7 +494,7 @@ class RepairApp(ctk.CTk):
                     else:
                         self.log_message("Vous utilisez déjà la dernière version disponible.", "success")
             except Exception as e:
-                self.log_message("Impossible de vérifier les mises à jour. Le repo est-il public ?", "error")
+                self.log_message(f"Erreur de mise à jour : {str(e)}\nAvez-vous publié une 'Release' sur GitHub ?", "error")
             self.btn_update.configure(state="normal")
 
         threading.Thread(target=thread_target, daemon=True).start()
