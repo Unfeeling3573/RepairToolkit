@@ -343,7 +343,7 @@ class SystemRepairManager:
             return f"Erreur lors de la désactivation de OneDrive : {str(e)}"
 
 # --- Configuration de l'application ---
-APP_VERSION = "2.0-dev2"
+APP_VERSION = "2.0-dev3"
 
 # --- 2. Interface Graphique (Le Frontend) ---
 class RepairApp(ctk.CTk):
@@ -351,6 +351,24 @@ class RepairApp(ctk.CTk):
         super().__init__()
 
         self.repair_manager = SystemRepairManager()
+
+        # --- Système de Langue ---
+        self.config = {"lang": "fr"}
+        if os.path.exists("config.json"):
+            try:
+                with open("config.json", "r", encoding="utf-8") as f:
+                    self.config = json.load(f)
+            except:
+                pass
+
+        self.translations = {}
+        lang_file = f"langs/{self.config['lang']}.json"
+        if os.path.exists(lang_file):
+            try:
+                with open(lang_file, "r", encoding="utf-8") as f:
+                    self.translations = json.load(f)
+            except:
+                pass
 
         # Configuration de la fenêtre principale
         self.title("Windows Repair Toolkit - Édition Pro")
@@ -377,24 +395,30 @@ class RepairApp(ctk.CTk):
         self.hw_label.grid(row=1, column=0, padx=10, pady=(0, 30))
 
         # Bouton utilitaire dans la sidebar
-        self.btn_clear_log = ctk.CTkButton(self.sidebar_frame, text="🗑️ Effacer la console", command=self.clear_logs, fg_color="transparent", border_width=1, text_color=("gray10", "#DCE4EE"))
+        self.btn_clear_log = ctk.CTkButton(self.sidebar_frame, text=self._("🗑️ Effacer la console"), command=self.clear_logs, fg_color="transparent", border_width=1, text_color=("gray10", "#DCE4EE"))
         self.btn_clear_log.grid(row=2, column=0, padx=20, pady=10)
 
-        self.btn_export_log = ctk.CTkButton(self.sidebar_frame, text="💾 Exporter Rapport", command=self.export_report, fg_color="transparent", border_width=1, text_color=("gray10", "#DCE4EE"))
+        self.btn_export_log = ctk.CTkButton(self.sidebar_frame, text=self._("💾 Exporter Rapport"), command=self.export_report, fg_color="transparent", border_width=1, text_color=("gray10", "#DCE4EE"))
         self.btn_export_log.grid(row=3, column=0, padx=20, pady=10)
 
-        self.btn_update = ctk.CTkButton(self.sidebar_frame, text="🔄 Mises à jour", command=self.check_update, fg_color="transparent", border_width=1, text_color=("gray10", "#DCE4EE"))
+        self.btn_update = ctk.CTkButton(self.sidebar_frame, text=self._("🔄 Mises à jour"), command=self.check_update, fg_color="transparent", border_width=1, text_color=("gray10", "#DCE4EE"))
         self.btn_update.grid(row=4, column=0, padx=20, pady=10)
 
         # Switch Thème Clair/Sombre
-        self.appearance_mode_switch = ctk.CTkSwitch(self.sidebar_frame, text="Mode Sombre", command=self.change_appearance_mode_event)
+        self.appearance_mode_switch = ctk.CTkSwitch(self.sidebar_frame, text=self._("Mode Sombre"), command=self.change_appearance_mode_event)
         self.appearance_mode_switch.grid(row=5, column=0, padx=20, pady=20)
         self.appearance_mode_switch.select() # Coché par défaut (Sombre)
 
+        # Menu de Sélection de la Langue
+        current_lang = "Français" if self.config.get("lang", "fr") == "fr" else "English"
+        self.btn_lang = ctk.CTkOptionMenu(self.sidebar_frame, values=["Français", "English"], command=self.change_language_event)
+        self.btn_lang.set(current_lang)
+        self.btn_lang.grid(row=6, column=0, padx=20, pady=10)
+
         # Indicateur de version
         self.version_label = ctk.CTkLabel(self.sidebar_frame, text=f"v{APP_VERSION} Pro Edition", font=ctk.CTkFont(size=10), text_color="#555555")
-        self.version_label.grid(row=7, column=0, pady=20, sticky="s")
-        self.sidebar_frame.grid_rowconfigure(6, weight=1)
+        self.version_label.grid(row=8, column=0, pady=20, sticky="s")
+        self.sidebar_frame.grid_rowconfigure(7, weight=1)
 
         # Raccourcis clavier (UX)
         self.bind("<Control-l>", self.clear_logs)
@@ -404,11 +428,11 @@ class RepairApp(ctk.CTk):
         self.tabview = ctk.CTkTabview(self)
         self.tabview.grid(row=0, column=1, padx=20, pady=(10, 5), sticky="nsew")
 
-        self.tab_sys = self.tabview.add("🛠️ Système")
-        self.tab_opti = self.tabview.add("⚡ Optimisation")
-        self.tab_sec = self.tabview.add("🛡️ Sécurité")
-        self.tab_net = self.tabview.add("🌐 Réseau & Nettoyage")
-        self.tab_utils = self.tabview.add("🧰 Utilitaires")
+        self.tab_sys = self.tabview.add(self._("🛠️ Système"))
+        self.tab_opti = self.tabview.add(self._("⚡ Optimisation"))
+        self.tab_sec = self.tabview.add(self._("🛡️ Sécurité"))
+        self.tab_net = self.tabview.add(self._("🌐 Réseau & Nettoyage"))
+        self.tab_utils = self.tabview.add(self._("🧰 Utilitaires"))
 
         # Layout des onglets
         self.tab_sys.grid_columnconfigure((0, 1, 2), weight=1)
@@ -451,7 +475,7 @@ class RepairApp(ctk.CTk):
         self.status_frame = ctk.CTkFrame(self, height=30, fg_color="transparent")
         self.status_frame.grid(row=1, column=1, padx=20, pady=(5, 5), sticky="ew")
 
-        self.status_label = ctk.CTkLabel(self.status_frame, text="✅ Prêt à analyser", font=ctk.CTkFont(weight="bold", size=13))
+        self.status_label = ctk.CTkLabel(self.status_frame, text=self._("✅ Prêt à analyser"), font=ctk.CTkFont(weight="bold", size=13))
         self.status_label.pack(side="left", padx=5)
 
         self.progress_bar = ctk.CTkProgressBar(self.status_frame, mode="indeterminate", height=6)
@@ -468,23 +492,27 @@ class RepairApp(ctk.CTk):
         self.console_textbox.tag_config("warning", foreground="#F1C40F")
         self.console_textbox.tag_config("error", foreground="#E74C3C")
 
-        self.log_message("Bienvenue dans Windows Repair Toolkit - Édition Pro.", "info")
-        self.log_message("Initialisation terminée. Choisissez une action dans les onglets ci-dessus.\n" + "="*70, "success")
+        self.log_message(self._("Bienvenue dans Windows Repair Toolkit - Édition Pro."), "info")
+        self.log_message(self._("Initialisation terminée. Choisissez une action dans les onglets ci-dessus.") + "\n" + "="*70, "success")
 
     # --- Fonctions UI/UX ---
+    def _(self, text):
+        """Fonction de traduction à la volée. Renvoie le texte d'origine si non trouvé."""
+        return self.translations.get(text, text)
+
     def create_action_card(self, parent, row, col, title, desc, command, btn_color=None, hover_color=None, colspan=1):
         """Crée une carte visuelle élégante pour contenir un bouton et sa description."""
         frame = ctk.CTkFrame(parent, corner_radius=8, border_width=1, border_color="#333333")
         frame.grid(row=row, column=col, columnspan=colspan, padx=10, pady=10, sticky="nsew")
 
-        btn = ctk.CTkButton(frame, text=title, command=command, font=ctk.CTkFont(weight="bold"))
+        btn = ctk.CTkButton(frame, text=self._(title), command=command, font=ctk.CTkFont(weight="bold"))
         if btn_color:
             btn.configure(fg_color=btn_color)
         if hover_color:
             btn.configure(hover_color=hover_color)
         btn.pack(pady=(15, 5), padx=15, fill="x")
 
-        lbl = ctk.CTkLabel(frame, text=desc, font=ctk.CTkFont(size=11), text_color="#AAAAAA", wraplength=210, justify="center")
+        lbl = ctk.CTkLabel(frame, text=self._(desc), font=ctk.CTkFont(size=11), text_color="#AAAAAA", wraplength=210, justify="center")
         lbl.pack(pady=(0, 15), padx=10, fill="both", expand=True)
 
         return btn
@@ -620,6 +648,45 @@ class RepairApp(ctk.CTk):
         threading.Thread(target=thread_target, daemon=True).start()
 
     # --- Lancement des tâches ---
+    def change_language_event(self, new_lang_name):
+        lang_map = {"Français": "fr", "English": "en"}
+        lang_code = lang_map.get(new_lang_name, "fr")
+
+        if lang_code == self.config.get("lang", "fr"):
+            return
+
+        self.btn_lang.configure(state="disabled")
+        self.log_message(f"Téléchargement du pack de langue '{lang_code}' depuis GitHub...", "info")
+
+        def thread_target():
+            try:
+                if not os.path.exists("langs"):
+                    os.makedirs("langs")
+
+                url = f"https://raw.githubusercontent.com/Unfeeling3573/RepairToolkit/v2-dev/langs/{lang_code}.json?nocache={int(time.time())}"
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+
+                req = urllib.request.Request(url, headers={'User-Agent': 'RepairToolkit'})
+                with urllib.request.urlopen(req, timeout=8, context=ssl_context) as response:
+                    data = response.read().decode('utf-8')
+                    with open(f"langs/{lang_code}.json", "w", encoding="utf-8") as f:
+                        f.write(data)
+
+                self.config["lang"] = lang_code
+                with open("config.json", "w", encoding="utf-8") as f:
+                    json.dump(self.config, f)
+
+                self.log_message(f"Pack de langue '{lang_code}' appliqué ! Veuillez redémarrer l'application.", "success")
+                messagebox.showinfo("Redémarrage requis", "Le kit de langue a été téléchargé avec succès.\n\nVeuillez redémarrer l'application pour appliquer la traduction.")
+            except Exception as e:
+                self.log_message(f"Erreur de téléchargement : {str(e)}\nLe fichier 'langs/{lang_code}.json' existe-t-il sur GitHub ?", "error")
+            finally:
+                self.btn_lang.configure(state="normal")
+
+        threading.Thread(target=thread_target, daemon=True).start()
+
     def change_appearance_mode_event(self):
         if self.appearance_mode_switch.get() == 1:
             ctk.set_appearance_mode("dark")

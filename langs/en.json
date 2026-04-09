@@ -1,0 +1,18 @@
+{
+  "🗑️ Effacer la console": "🗑️ Clear console",
+  "💾 Exporter Rapport": "💾 Export Report",
+  "🔄 Mises à jour": "🔄 Check Updates",
+  "Mode Sombre": "Dark Mode",
+  "🛠️ Système": "🛠️ System",
+  "⚡ Optimisation": "⚡ Optimization",
+  "🛡️ Sécurité": "🛡️ Security",
+  "🌐 Réseau & Nettoyage": "🌐 Network & Cleanup",
+  "🧰 Utilitaires": "🧰 Utilities",
+  "✅ Prêt à analyser": "✅ Ready to analyze",
+  "Bienvenue dans Windows Repair Toolkit - Édition Pro.": "Welcome to Windows Repair Toolkit - Pro Edition.",
+  "Initialisation terminée. Choisissez une action dans les onglets ci-dessus.": "Initialization complete. Choose an action from the tabs above.",
+  "1. Scan SFC": "1. SFC Scan",
+  "Vérifie l'intégrité et répare les fichiers système corrompus de Windows.": "Checks integrity and repairs corrupted Windows system files.",
+  "2. Réparer Image (DISM)": "2. Repair Image (DISM)",
+  "Répare l'image système globale de Windows via Windows Update.": "Repairs the overall Windows system image via Windows Update."
+}
