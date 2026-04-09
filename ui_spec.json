@@ -3,7 +3,7 @@
     "description": "UI specification for Windows Repair Toolkit — Pro Edition. Use this file to regenerate the full customtkinter interface. Every widget, style value, layout parameter and color is extracted directly from main.py.",
     "framework": "customtkinter",
     "python_version": "3.11+",
-    "app_version": "2.0-dev4",
+    "app_version": "2.0-dev5",
     "dependencies": ["customtkinter", "fpdf", "pyinstaller"],
     "entry_class": "RepairApp",
     "base_class": "ctk.CTk"
@@ -336,7 +336,7 @@
             "title": "Rapport Batterie",
             "description": "Génère un rapport HTML complet sur l'état et l'usure de votre batterie.",
             "command": "start_battery_report",
-            "grid": { "row": 1, "col": 0, "colspan": 2 },
+            "grid": { "row": 1, "col": 0, "colspan": 1 },
             "color_theme": "default"
           },
           {
@@ -344,6 +344,14 @@
             "title": "Infos Système",
             "description": "Affiche des informations matérielles détaillées (Carte Mère, GPU).",
             "command": "start_detailed_sysinfo",
+            "grid": { "row": 1, "col": 1, "colspan": 1 },
+            "color_theme": "default"
+          },
+          {
+            "id": "btn_install_software",
+            "title": "Installer Logiciel",
+            "description": "Installe silencieusement une application via Winget (ex: VLC, Chrome, 7zip).",
+            "command": "start_software_install",
             "grid": { "row": 2, "col": 0, "colspan": 2 },
             "color_theme": "default"
           }

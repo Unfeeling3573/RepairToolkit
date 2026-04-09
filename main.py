@@ -342,8 +342,22 @@ class SystemRepairManager:
         except Exception as e:
             return f"Erreur lors de la désactivation de OneDrive : {str(e)}"
 
+    def install_software(self, software_id: str) -> str:
+        if not self.is_windows:
+            time.sleep(2)
+            return f"[Mac Mode] Simulation : Logiciel '{software_id}' téléchargé et installé avec succès."
+        try:
+            # Commande Winget pour une installation silencieuse avec acceptation auto des licences
+            command = ["winget", "install", "--id", software_id, "--silent", "--accept-package-agreements", "--accept-source-agreements"]
+            res = self.execute_command(command)
+            if "Aucun package" in res or "No package" in res or "n'a pas été reconnu" in res:
+                return f"⚠️ Impossible de trouver le logiciel '{software_id}'. Vérifiez le nom exact (ex: Mozilla.Firefox)."
+            return f"📦 Installation terminée pour '{software_id}' :\n{res}"
+        except Exception as e:
+            return f"Erreur lors de l'installation : {str(e)}"
+
 # --- Configuration de l'application ---
-APP_VERSION = "2.0-dev4"
+APP_VERSION = "2.0-dev5"
 
 # --- 2. Interface Graphique (Le Frontend) ---
 class RepairApp(ctk.CTk):
@@ -474,8 +488,9 @@ class RepairApp(ctk.CTk):
 
         self.btn_license = self.create_action_card(self.tab_utils, 0, 0, "Clé de Licence", "Récupère la clé de produit Windows originale intégrée à la carte mère.", self.start_license_check)
         self.btn_disk = self.create_action_card(self.tab_utils, 0, 1, "Santé des Disques", "Vérifie l'état de santé S.M.A.R.T de vos disques durs et SSD.", self.start_disk_check)
-        self.btn_battery = self.create_action_card(self.tab_utils, 1, 0, "Rapport Batterie", "Génère un rapport HTML complet sur l'état et l'usure de votre batterie.", self.start_battery_report, colspan=2)
-        self.btn_sysinfo = self.create_action_card(self.tab_utils, 2, 0, "Infos Système", "Affiche des informations matérielles détaillées (Carte Mère, GPU).", self.start_detailed_sysinfo, colspan=2)
+        self.btn_battery = self.create_action_card(self.tab_utils, 1, 0, "Rapport Batterie", "Génère un rapport HTML complet sur l'état et l'usure de votre batterie.", self.start_battery_report)
+        self.btn_sysinfo = self.create_action_card(self.tab_utils, 1, 1, "Infos Système", "Affiche des informations matérielles détaillées (Carte Mère, GPU).", self.start_detailed_sysinfo)
+        self.btn_install_software = self.create_action_card(self.tab_utils, 2, 0, "Installer Logiciel", "Installe silencieusement une application via Winget (ex: VLC, Chrome, 7zip).", self.start_software_install, colspan=2)
 
         # -- Zone de Statut et Barre de Progression (Nouvelle Feature UX) --
         self.status_frame = ctk.CTkFrame(self, height=30, fg_color="transparent")
@@ -776,6 +791,13 @@ class RepairApp(ctk.CTk):
     def start_disable_onedrive(self):
         if messagebox.askyesno("Optimisation", "Voulez-vous vraiment désactiver complètement OneDrive ?\n\nVos fichiers locaux ne seront plus synchronisés avec le cloud."):
             self.run_async_task(self.btn_onedrive, self.repair_manager.disable_onedrive, "Désactivation de Microsoft OneDrive...")
+
+    def start_software_install(self):
+        dialog = ctk.CTkInputDialog(text="Entrez l'ID Winget ou le nom exact du logiciel :\n(ex: Mozilla.Firefox, 7zip.7zip, VideoLAN.VLC)", title="Installation de logiciel")
+        software_id = dialog.get_input()
+        if software_id and software_id.strip():
+            # L'utilisation de lambda permet de passer un paramètre à notre fonction d'installation
+            self.run_async_task(self.btn_install_software, lambda: self.repair_manager.install_software(software_id.strip()), f"Téléchargement et installation de '{software_id}' via Winget...")
 
 # Point d'entrée de l'application
 if __name__ == "__main__":
