@@ -18,6 +18,11 @@ L'application est divisée en plusieurs onglets thématiques pour une utilisatio
 *   **Point de Restauration** : Crée une sauvegarde système instantanée.
 *   **Réparer Explorateur** : Redémarre `explorer.exe` en cas de blocage de l'interface Windows.
 
+### ⚡ Optimisation
+*   **Désactiver Télémétrie** : Bloque la collecte de données (DiagTrack) et le pistage par Microsoft.
+*   **Bloquer Apps Arrière-plan** : Empêche les applications Windows de consommer des ressources en tâche de fond.
+*   **Désactiver OneDrive** : Arrête la synchronisation cloud et retire OneDrive du démarrage système.
+
 ### 🛡️ Sécurité
 *   **Scan Malware** : Recherche de scripts et d'exécutables suspects dans les dossiers temporaires et les téléchargements.
 *   **Traces PDF Vérolé** : Détecte les malwares utilisant la technique de la double extension (`.pdf.exe`).
@@ -34,6 +39,13 @@ L'application est divisée en plusieurs onglets thématiques pour une utilisatio
 *   **Clé de Licence** : Récupère la clé de produit Windows (OEM) ancrée dans le BIOS/UEFI.
 *   **Santé des Disques** : Affiche l'état de santé physique (S.M.A.R.T.) des disques SSD/HDD.
 *   **Rapport Batterie** : Génère un rapport HTML complet sur l'usure de la batterie (pour PC portables).
+*   **Infos Système** : Affiche des informations matérielles détaillées (Carte Mère, GPU).
+*   **Installer Logiciel** : Catalogue intégré interactif pour installer des logiciels en lot (silencieusement) via Winget (Chrome, VLC, 7-Zip, etc.).
+
+### 🎨 Interface & Personnalisation
+*   **Mode Sombre / Clair** : Thème moderne premium (CustomTkinter) avec bascule instantanée.
+*   **Multi-langues (i18n)** : Traduction à la volée avec téléchargement dynamique des packs de langues depuis GitHub.
+*   **Architecture UI** : L'interface est spécifiée et gérée via le fichier `ui_spec.json`.
 
 ---
 
