@@ -363,7 +363,7 @@ class SystemRepairManager:
         return "📦 Rapport d'installation Winget :\n" + "\n".join(results)
 
 # --- Configuration de l'application ---
-APP_VERSION = "2.0-dev6"
+APP_VERSION = "2.0-dev7"
 
 # --- Interface Catalogue de Logiciels ---
 class SoftwareCatalogWindow(ctk.CTkToplevel):
@@ -393,17 +393,36 @@ class SoftwareCatalogWindow(ctk.CTkToplevel):
                 "Rufus": "Rufus.Rufus",
                 "PowerToys": "Microsoft.PowerToys"
             },
+            "⚙️ Utilitaires Avancés": {
+                "HWMonitor": "CPUID.HWMonitor",
+                "CrystalDiskInfo": "CrystalDewWorld.CrystalDiskInfo",
+                "PuTTY": "PuTTY.PuTTY"
+            },
             "💬 Communication": {
                 "Discord": "Discord.Discord",
                 "WhatsApp": "WhatsApp.WhatsApp",
                 "Zoom": "Zoom.Zoom",
                 "Telegram": "Telegram.TelegramDesktop"
             },
+            "📡 Contrôle à distance": {
+                "AnyDesk": "AnyDeskSoftwareGmbH.AnyDesk",
+                "TeamViewer": "TeamViewer.TeamViewer"
+            },
+            "☁️ Cloud & Stockage": {
+                "Google Drive": "Google.Drive",
+                "Dropbox": "Dropbox.Dropbox"
+            },
+            "🎮 Gaming": {
+                "Steam": "Valve.Steam",
+                "Epic Games Launcher": "EpicGames.EpicGamesLauncher"
+            },
             "📄 Bureautique & Dev": {
                 "LibreOffice": "TheDocumentFoundation.LibreOffice",
                 "Acrobat Reader": "Adobe.Acrobat.Reader.64-bit",
                 "VS Code": "Microsoft.VisualStudioCode",
-                "Python 3.11": "Python.Python.3.11"
+                "Python 3.11": "Python.Python.3.11",
+                "Git": "Git.Git",
+                "Docker Desktop": "Docker.DockerDesktop"
             }
         }
 
