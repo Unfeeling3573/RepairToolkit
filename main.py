@@ -342,22 +342,122 @@ class SystemRepairManager:
         except Exception as e:
             return f"Erreur lors de la désactivation de OneDrive : {str(e)}"
 
-    def install_software(self, software_id: str) -> str:
+    def install_software_list(self, software_ids: list) -> str:
         if not self.is_windows:
             time.sleep(2)
-            return f"[Mac Mode] Simulation : Logiciel '{software_id}' téléchargé et installé avec succès."
-        try:
-            # Commande Winget pour une installation silencieuse avec acceptation auto des licences
-            command = ["winget", "install", "--id", software_id, "--silent", "--accept-package-agreements", "--accept-source-agreements"]
-            res = self.execute_command(command)
-            if "Aucun package" in res or "No package" in res or "n'a pas été reconnu" in res:
-                return f"⚠️ Impossible de trouver le logiciel '{software_id}'. Vérifiez le nom exact (ex: Mozilla.Firefox)."
-            return f"📦 Installation terminée pour '{software_id}' :\n{res}"
-        except Exception as e:
-            return f"Erreur lors de l'installation : {str(e)}"
+            return f"[Mac Mode] Simulation : {len(software_ids)} logiciel(s) installé(s) avec succès."
+
+        results = []
+        for sw_id in software_ids:
+            try:
+                # Commande Winget pour une installation silencieuse avec acceptation auto des licences
+                command = ["winget", "install", "--id", sw_id, "--silent", "--accept-package-agreements", "--accept-source-agreements"]
+                res = self.execute_command(command)
+                if "Aucun package" in res or "No package" in res or "n'a pas été reconnu" in res:
+                    results.append(f"⚠️ Introuvable : {sw_id}")
+                else:
+                    results.append(f"✅ Installé : {sw_id}")
+            except Exception as e:
+                results.append(f"❌ Erreur ({sw_id}) : {str(e)}")
+
+        return "📦 Rapport d'installation Winget :\n" + "\n".join(results)
 
 # --- Configuration de l'application ---
-APP_VERSION = "2.0-dev5"
+APP_VERSION = "2.0-dev6"
+
+# --- Interface Catalogue de Logiciels ---
+class SoftwareCatalogWindow(ctk.CTkToplevel):
+    def __init__(self, parent, install_callback):
+        super().__init__(parent)
+        self.title("Catalogue de Logiciels (Winget)")
+        self.geometry("550x650")
+        self.attributes("-topmost", True) # Garde la fenêtre au premier plan
+        self.install_callback = install_callback
+
+        self.catalog = {
+            "🌐 Navigateurs": {
+                "Google Chrome": "Google.Chrome",
+                "Mozilla Firefox": "Mozilla.Firefox",
+                "Brave Browser": "Brave.Brave",
+                "Opera GX": "Opera.OperaGX"
+            },
+            "🎬 Multimédia": {
+                "VLC Media Player": "VideoLAN.VLC",
+                "Spotify": "Spotify.Spotify",
+                "OBS Studio": "OBSProject.OBSStudio"
+            },
+            "🛠️ Utilitaires": {
+                "7-Zip": "7zip.7zip",
+                "WinRAR": "RARLab.WinRAR",
+                "Notepad++": "Notepad++.Notepad++",
+                "Rufus": "Rufus.Rufus",
+                "PowerToys": "Microsoft.PowerToys"
+            },
+            "💬 Communication": {
+                "Discord": "Discord.Discord",
+                "WhatsApp": "WhatsApp.WhatsApp",
+                "Zoom": "Zoom.Zoom",
+                "Telegram": "Telegram.TelegramDesktop"
+            },
+            "📄 Bureautique & Dev": {
+                "LibreOffice": "TheDocumentFoundation.LibreOffice",
+                "Acrobat Reader": "Adobe.Acrobat.Reader.64-bit",
+                "VS Code": "Microsoft.VisualStudioCode",
+                "Python 3.11": "Python.Python.3.11"
+            }
+        }
+
+        self.checkboxes = {}
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+
+        self.label = ctk.CTkLabel(self, text="Sélectionnez les logiciels à installer :", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label.grid(row=0, column=0, pady=(20, 10))
+
+        self.scrollable_frame = ctk.CTkScrollableFrame(self)
+        self.scrollable_frame.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
+
+        row_idx = 0
+        for category, softwares in self.catalog.items():
+            cat_label = ctk.CTkLabel(self.scrollable_frame, text=category, font=ctk.CTkFont(size=14, weight="bold"), text_color="#5DADE2")
+            cat_label.grid(row=row_idx, column=0, sticky="w", pady=(15, 5), padx=10)
+            row_idx += 1
+
+            for name, winget_id in softwares.items():
+                var = ctk.StringVar(value="")
+                cb = ctk.CTkCheckBox(self.scrollable_frame, text=name, variable=var, onvalue=winget_id, offvalue="")
+                cb.grid(row=row_idx, column=0, sticky="w", pady=5, padx=30)
+                self.checkboxes[name] = var
+                row_idx += 1
+
+        self.lbl_custom = ctk.CTkLabel(self.scrollable_frame, text="Autre (ID Winget personnalisé) :", font=ctk.CTkFont(size=14, weight="bold"), text_color="#5DADE2")
+        self.lbl_custom.grid(row=row_idx, column=0, sticky="w", pady=(15, 5), padx=10)
+        row_idx += 1
+
+        self.entry_custom = ctk.CTkEntry(self.scrollable_frame, placeholder_text="ex: GitHub.GitHubDesktop", width=250)
+        self.entry_custom.grid(row=row_idx, column=0, sticky="w", pady=5, padx=30)
+
+        self.btn_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.btn_frame.grid(row=2, column=0, pady=20)
+
+        self.btn_install = ctk.CTkButton(self.btn_frame, text="Installer la sélection", command=self.confirm_install, fg_color="#2ECC71", hover_color="#27AE60")
+        self.btn_install.pack(side="left", padx=10)
+
+        self.btn_cancel = ctk.CTkButton(self.btn_frame, text="Annuler", command=self.destroy, fg_color="#E74C3C", hover_color="#C0392B")
+        self.btn_cancel.pack(side="left", padx=10)
+
+    def confirm_install(self):
+        selected_ids = [var.get() for var in self.checkboxes.values() if var.get() != ""]
+        custom_id = self.entry_custom.get().strip()
+        if custom_id:
+            selected_ids.append(custom_id)
+
+        if not selected_ids:
+            messagebox.showwarning("Sélection vide", "Veuillez sélectionner au moins un logiciel ou entrer un ID personnalisé.")
+            return
+
+        self.destroy()
+        self.install_callback(selected_ids)
 
 # --- 2. Interface Graphique (Le Frontend) ---
 class RepairApp(ctk.CTk):
@@ -793,11 +893,11 @@ class RepairApp(ctk.CTk):
             self.run_async_task(self.btn_onedrive, self.repair_manager.disable_onedrive, "Désactivation de Microsoft OneDrive...")
 
     def start_software_install(self):
-        dialog = ctk.CTkInputDialog(text="Entrez l'ID Winget ou le nom exact du logiciel :\n(ex: Mozilla.Firefox, 7zip.7zip, VideoLAN.VLC)", title="Installation de logiciel")
-        software_id = dialog.get_input()
-        if software_id and software_id.strip():
-            # L'utilisation de lambda permet de passer un paramètre à notre fonction d'installation
-            self.run_async_task(self.btn_install_software, lambda: self.repair_manager.install_software(software_id.strip()), f"Téléchargement et installation de '{software_id}' via Winget...")
+        SoftwareCatalogWindow(self, self._execute_software_install)
+
+    def _execute_software_install(self, software_ids):
+        msg = f"Téléchargement et installation de {len(software_ids)} logiciel(s) en arrière-plan..."
+        self.run_async_task(self.btn_install_software, lambda: self.repair_manager.install_software_list(software_ids), msg)
 
 # Point d'entrée de l'application
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
     "description": "UI specification for Windows Repair Toolkit — Pro Edition. Use this file to regenerate the full customtkinter interface. Every widget, style value, layout parameter and color is extracted directly from main.py.",
     "framework": "customtkinter",
     "python_version": "3.11+",
-    "app_version": "2.0-dev5",
+    "app_version": "2.0-dev6",
     "dependencies": ["customtkinter", "fpdf", "pyinstaller"],
     "entry_class": "RepairApp",
     "base_class": "ctk.CTk"
@@ -43,15 +43,15 @@
     "sidebar_button_text_color_light": "gray10",
     "sidebar_button_text_color_dark": "#DCE4EE",
     "console_tags": {
-      "info":    { "foreground": "#5DADE2" },
+      "info": { "foreground": "#5DADE2" },
       "success": { "foreground": "#2ECC71" },
       "warning": { "foreground": "#F1C40F" },
-      "error":   { "foreground": "#E74C3C" }
+      "error": { "foreground": "#E74C3C" }
     },
     "action_card_colors": {
-      "default":     { "fg_color": null,      "hover_color": null      },
-      "dark_theme":  { "fg_color": "#2C3E50", "hover_color": "#1A252F" },
-      "danger":      { "fg_color": "#8B0000", "hover_color": "#5C0000" },
+      "default": { "fg_color": null, "hover_color": null },
+      "dark_theme": { "fg_color": "#2C3E50", "hover_color": "#1A252F" },
+      "danger": { "fg_color": "#8B0000", "hover_color": "#5C0000" },
       "kill_switch": { "fg_color": "#C0392B", "hover_color": "#922B21" }
     }
   },
@@ -61,7 +61,11 @@
     "width": 220,
     "corner_radius": 0,
     "grid": { "row": 0, "column": 0, "rowspan": 3, "sticky": "nsew" },
-    "row_weight": { "index": 7, "weight": 1, "note": "pushes version label to bottom" },
+    "row_weight": {
+      "index": 7,
+      "weight": 1,
+      "note": "pushes version label to bottom"
+    },
     "children": [
       {
         "id": "logo_label",
@@ -142,7 +146,13 @@
 
   "tabview": {
     "widget": "CTkTabview",
-    "grid": { "row": 0, "column": 1, "padx": 20, "pady": [10, 5], "sticky": "nsew" },
+    "grid": {
+      "row": 0,
+      "column": 1,
+      "padx": 20,
+      "pady": [10, 5],
+      "sticky": "nsew"
+    },
     "tabs": [
       {
         "id": "tab_sys",
@@ -350,7 +360,7 @@
           {
             "id": "btn_install_software",
             "title": "Installer Logiciel",
-            "description": "Installe silencieusement une application via Winget (ex: VLC, Chrome, 7zip).",
+            "description": "Ouvre un catalogue pour installer silencieusement des applications via Winget.",
             "command": "start_software_install",
             "grid": { "row": 2, "col": 0, "colspan": 2 },
             "color_theme": "default"
@@ -364,7 +374,13 @@
     "widget": "CTkFrame",
     "height": 30,
     "fg_color": "transparent",
-    "grid": { "row": 1, "column": 1, "padx": 20, "pady": [5, 5], "sticky": "ew" },
+    "grid": {
+      "row": 1,
+      "column": 1,
+      "padx": 20,
+      "pady": [5, 5],
+      "sticky": "ew"
+    },
     "children": [
       {
         "id": "status_label",
@@ -380,7 +396,12 @@
         "mode": "indeterminate",
         "height": 6,
         "default_value": 0,
-        "pack": { "side": "right", "fill": "x", "expand": true, "padx": [20, 5] }
+        "pack": {
+          "side": "right",
+          "fill": "x",
+          "expand": true,
+          "padx": [20, 5]
+        }
       }
     ]
   },
@@ -392,16 +413,28 @@
     "corner_radius": 10,
     "border_width": 1,
     "border_color": "#333333",
-    "grid": { "row": 2, "column": 1, "padx": 20, "pady": [0, 20], "sticky": "nsew" },
+    "grid": {
+      "row": 2,
+      "column": 1,
+      "padx": 20,
+      "pady": [0, 20],
+      "sticky": "nsew"
+    },
     "tags": {
-      "info":    { "foreground": "#5DADE2" },
+      "info": { "foreground": "#5DADE2" },
       "success": { "foreground": "#2ECC71" },
       "warning": { "foreground": "#F1C40F" },
-      "error":   { "foreground": "#E74C3C" }
+      "error": { "foreground": "#E74C3C" }
     },
     "startup_messages": [
-      { "text": "Bienvenue dans Windows Repair Toolkit - Édition Pro.", "tag": "info" },
-      { "text": "Initialisation terminée. Choisissez une action dans les onglets ci-dessus.\n======================================================================", "tag": "success" }
+      {
+        "text": "Bienvenue dans Windows Repair Toolkit - Édition Pro.",
+        "tag": "info"
+      },
+      {
+        "text": "Initialisation terminée. Choisissez une action dans les onglets ci-dessus.\n======================================================================",
+        "tag": "success"
+      }
     ]
   },
 
