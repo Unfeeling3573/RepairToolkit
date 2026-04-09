@@ -11,6 +11,7 @@ import urllib.request
 import json
 import webbrowser
 from fpdf import FPDF
+import ssl
 
 # Importation conditionnelle pour éviter que le code ne crashe sur Mac
 if platform.system() == "Windows":
@@ -482,8 +483,13 @@ class RepairApp(ctk.CTk):
 
         def thread_target():
             try:
+                # Contournement de l'erreur de certificat SSL (très fréquente sur macOS)
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+
                 req = urllib.request.Request(UPDATE_URL, headers={'User-Agent': 'RepairToolkit'})
-                with urllib.request.urlopen(req, timeout=5) as response:
+                with urllib.request.urlopen(req, timeout=5, context=ssl_context) as response:
                     data = json.loads(response.read().decode())
                     latest_version = data.get("tag_name", "").replace("v", "")
 
