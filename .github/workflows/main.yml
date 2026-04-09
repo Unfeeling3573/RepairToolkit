@@ -41,7 +41,7 @@ jobs:
           path: dist/Windows_Repair_Toolkit
 
   build-mac:
-    runs-on: macos-12
+    runs-on: macos-13
 
     steps:
       - name: Récupération du code
