@@ -2,6 +2,7 @@ import platform
 import subprocess
 import time
 import os
+import shutil
 
 if platform.system() == "Windows":
     import winreg
@@ -86,6 +87,51 @@ class SystemRepairManager:
             return res + (f"\n... et {len(found_files) - 15} autres." if len(found_files) > 15 else "")
         except Exception as e:
             return f"Erreur lors du scan : {str(e)}"
+
+    def quarantine_suspicious_files(self) -> str:
+        if not self.is_windows:
+            time.sleep(2)
+            return "[Mac Mode] Simulation : 3 fichiers suspects mis en quarantaine avec succès."
+
+        try:
+            temp_dir = os.environ.get('TEMP', '')
+            downloads_dir = os.path.join(os.environ.get('USERPROFILE', ''), 'Downloads')
+
+            # Création du dossier de quarantaine à la racine (C:\RepairToolkit_Quarantine)
+            system_drive = os.environ.get('SystemDrive', 'C:')
+            quarantine_dir = os.path.join(system_drive + '\\', 'RepairToolkit_Quarantine')
+
+            if not os.path.exists(quarantine_dir):
+                os.makedirs(quarantine_dir)
+                # Cache le dossier pour éviter que l'utilisateur ne clique dessus par erreur
+                self.execute_command(["attrib", "+h", "+s", quarantine_dir])
+
+            directories_to_scan = [temp_dir, downloads_dir]
+            suspicious_extensions = ['.exe', '.vbs', '.bat', '.ps1', '.js', '.scr', '.cmd']
+            quarantined_count = 0
+
+            for directory in directories_to_scan:
+                if not directory or not os.path.exists(directory):
+                    continue
+                for root, _, files in os.walk(directory):
+                    for file in files:
+                        if any(file.lower().endswith(ext) for ext in suspicious_extensions):
+                            file_path = os.path.join(root, file)
+                            try:
+                                # On déplace et on ajoute ".locked" pour casser l'extension d'origine
+                                safe_name = file + ".locked"
+                                dest_path = os.path.join(quarantine_dir, safe_name)
+                                shutil.move(file_path, dest_path)
+                                quarantined_count += 1
+                            except Exception:
+                                pass # Le fichier est peut-être utilisé par le système
+
+            if quarantined_count == 0:
+                return "Scan terminé : Aucun fichier exécutable suspect à mettre en quarantaine."
+
+            return f"🛡️ Quarantaine réussie : {quarantined_count} fichier(s) neutralisé(s) et isolé(s) dans {quarantine_dir}."
+        except Exception as e:
+            return f"Erreur lors de la mise en quarantaine : {str(e)}"
 
     def scan_leftover_pdf_traces(self) -> str:
         if not self.is_windows:

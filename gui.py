@@ -15,7 +15,7 @@ import ssl
 from backend import SystemRepairManager
 
 # --- Configuration de l'application ---
-APP_VERSION = "2.0-dev8"
+APP_VERSION = "2.0-dev9"
 
 # --- Interface Catalogue de Logiciels ---
 class SoftwareCatalogWindow(ctk.CTkToplevel):
@@ -247,8 +247,10 @@ class RepairApp(ctk.CTk):
         self.btn_pdf_trace = self.create_action_card(self.tab_sec, 0, 1, "Traces PDF Vérolé", "Détecte les doubles extensions et les faux PDF laissés par les virus.", self.start_pdf_trace_scan, **card_themes["danger"])
         self.btn_registry = self.create_action_card(self.tab_sec, 0, 2, "Scan Registre", "Vérifie les clés Run/RunOnce pour débusquer les virus au démarrage.", self.start_registry_scan, **card_themes["danger"])
 
+        self.btn_quarantine = self.create_action_card(self.tab_sec, 1, 0, "Mise en Quarantaine", "Isole et désactive les exécutables suspects dans un dossier sécurisé.", self.start_quarantine, **card_themes["danger"], colspan=3)
+
         # Bouton Kill Switch (Prend toute la largeur de la ligne en dessous)
-        self.btn_kill = self.create_action_card(self.tab_sec, 1, 0, "🚨 KILL SWITCH (Suppression)", "Arrêt d'urgence des processus suspects en mémoire et suppression forcée des charges utiles.", self.start_kill_switch, **card_themes["kill_switch"], colspan=3)
+        self.btn_kill = self.create_action_card(self.tab_sec, 2, 0, "🚨 KILL SWITCH (Suppression)", "Arrêt d'urgence des processus suspects en mémoire et suppression forcée des charges utiles.", self.start_kill_switch, **card_themes["kill_switch"], colspan=3)
 
         self.btn_dns = self.create_action_card(self.tab_net, 0, 0, "Vider Cache DNS", "Résout la plupart des problèmes de connexion aux sites internet.", self.start_flush_dns)
         self.btn_hosts = self.create_action_card(self.tab_net, 0, 1, "Restaurer HOSTS", "Réinitialise le fichier HOSTS pour bloquer les redirections malveillantes.", self.start_hosts_restore)
@@ -523,6 +525,10 @@ class RepairApp(ctk.CTk):
 
     def start_malware_scan(self):
         self.run_async_task(self.btn_malware, self.repair_manager.scan_suspicious_files, "Recherche de scripts suspects (Temp & Downloads)...")
+
+    def start_quarantine(self):
+        if messagebox.askyesno("Mise en Quarantaine", "Cette action va neutraliser et déplacer les exécutables suspects des dossiers Temp/Téléchargements vers C:\\RepairToolkit_Quarantine.\n\nVoulez-vous continuer ?"):
+            self.run_async_task(self.btn_quarantine, self.repair_manager.quarantine_suspicious_files, "Mise en quarantaine des menaces...")
 
     def start_pdf_trace_scan(self):
         self.run_async_task(self.btn_pdf_trace, self.repair_manager.scan_leftover_pdf_traces, "Recherche de traces laissées par un PDF malveillant...")

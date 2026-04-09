@@ -3,7 +3,7 @@
     "description": "UI specification for Windows Repair Toolkit — Pro Edition. Use this file to regenerate the full customtkinter interface. Every widget, style value, layout parameter and color is extracted directly from main.py.",
     "framework": "customtkinter",
     "python_version": "3.11+",
-    "app_version": "2.0-dev6",
+    "app_version": "2.0-dev9",
     "dependencies": ["customtkinter", "fpdf", "pyinstaller"],
     "entry_class": "RepairApp",
     "base_class": "ctk.CTk"
@@ -260,11 +260,19 @@
             "color_theme": "danger"
           },
           {
+            "id": "btn_quarantine",
+            "title": "Mise en Quarantaine",
+            "description": "Isole et désactive les exécutables suspects dans un dossier sécurisé.",
+            "command": "start_quarantine",
+            "grid": { "row": 1, "col": 0, "colspan": 3 },
+            "color_theme": "danger"
+          },
+          {
             "id": "btn_kill",
             "title": "🚨 KILL SWITCH (Suppression)",
             "description": "Arrêt d'urgence des processus suspects en mémoire et suppression forcée des charges utiles.",
             "command": "start_kill_switch",
-            "grid": { "row": 1, "col": 0, "colspan": 3 },
+            "grid": { "row": 2, "col": 0, "colspan": 3 },
             "color_theme": "kill_switch"
           }
         ]
