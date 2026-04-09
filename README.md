@@ -52,7 +52,8 @@ Assurez-vous d'avoir Python 3.11+ installé.
 
 ```bash
 # 1. Cloner le dépôt
-git clone https://github.com/VOTRE_PSEUDO/RepairToolkit.git
+git clone https://github.com/Unfeeling3573
+/RepairToolkit.git
 cd RepairToolkit
 
 # 2. Créer un environnement virtuel (Optionnel mais recommandé)
