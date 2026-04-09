@@ -10,7 +10,9 @@ from datetime import datetime
 import urllib.request
 import json
 import webbrowser
+import re
 from fpdf import FPDF
+import ssl
 
 # Importation conditionnelle pour éviter que le code ne crashe sur Mac
 if platform.system() == "Windows":
@@ -328,7 +330,6 @@ class SystemRepairManager:
 
 # --- Configuration de l'application ---
 APP_VERSION = "2.0-dev1"
-UPDATE_URL = "https://api.github.com/repos/Unfeeling3573/RepairToolkit/releases/latest" # Remplacer TON_PSEUDO par ton vrai pseudo GitHub
 
 # --- 2. Interface Graphique (Le Frontend) ---
 class RepairApp(ctk.CTk):
@@ -541,19 +542,32 @@ class RepairApp(ctk.CTk):
 
         def thread_target():
             try:
-                req = urllib.request.Request(UPDATE_URL, headers={'User-Agent': 'RepairToolkit'})
-                with urllib.request.urlopen(req, timeout=5) as response:
-                    data = json.loads(response.read().decode())
-                    latest_version = data.get("tag_name", "").replace("v", "")
+                # Contournement de l'erreur de certificat SSL (très fréquente sur macOS)
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
 
-                    if latest_version and latest_version != APP_VERSION:
-                        if messagebox.askyesno("Mise à jour disponible", f"La version {latest_version} est disponible !\n\nVous utilisez actuellement la version {APP_VERSION}.\nVoulez-vous ouvrir la page de téléchargement ?"):
-                            webbrowser.open(data.get("html_url", ""))
-                            self.log_message(f"Ouverture du navigateur pour télécharger la v{latest_version}.", "success")
+                # Lecture directe du code source sur GitHub (l'astuce 'nocache' force GitHub à donner la version la plus récente)
+                RAW_URL = f"https://raw.githubusercontent.com/Unfeeling3573/RepairToolkit/v2-dev/main.py?nocache={int(time.time())}"
+                req = urllib.request.Request(RAW_URL, headers={'User-Agent': 'RepairToolkit'})
+
+                with urllib.request.urlopen(req, timeout=8, context=ssl_context) as response:
+                    content = response.read().decode('utf-8')
+
+                    # Extraction intelligente du numéro de version dans le code distant
+                    match = re.search(r'APP_VERSION\s*=\s*["\']([^"\']+)["\']', content)
+                    if match:
+                        remote_version = match.group(1)
+                        if remote_version != APP_VERSION:
+                            if messagebox.askyesno("Mise à jour disponible", f"Une nouveauté a été détectée sur GitHub (v{remote_version}) !\n\nVous avez la v{APP_VERSION}.\nVoulez-vous ouvrir la page du projet ?"):
+                                webbrowser.open("https://github.com/Unfeeling3573/RepairToolkit")
+                                self.log_message("Ouverture de GitHub pour la mise à jour.", "success")
+                        else:
+                            self.log_message("Vous utilisez déjà la dernière version.", "success")
                     else:
-                        self.log_message("Vous utilisez déjà la dernière version disponible.", "success")
+                        self.log_message("Impossible de lire la version sur GitHub.", "error")
             except Exception as e:
-                self.log_message("Impossible de vérifier les mises à jour. Le repo est-il public ?", "error")
+                self.log_message(f"Erreur réseau : {str(e)}", "error")
             self.btn_update.configure(state="normal")
 
         threading.Thread(target=thread_target, daemon=True).start()
