@@ -343,7 +343,7 @@ class SystemRepairManager:
             return f"Erreur lors de la désactivation de OneDrive : {str(e)}"
 
 # --- Configuration de l'application ---
-APP_VERSION = "2.0-dev3"
+APP_VERSION = "2.0-dev4"
 
 # --- 2. Interface Graphique (Le Frontend) ---
 class RepairApp(ctk.CTk):
@@ -494,6 +494,11 @@ class RepairApp(ctk.CTk):
 
         self.log_message(self._("Bienvenue dans Windows Repair Toolkit - Édition Pro."), "info")
         self.log_message(self._("Initialisation terminée. Choisissez une action dans les onglets ci-dessus.") + "\n" + "="*70, "success")
+
+        # --- Téléchargement silencieux si la langue par défaut n'est pas installée ---
+        if not os.path.exists(lang_file):
+            self.log_message(f"Téléchargement du pack de langue par défaut ({self.config['lang']}) en arrière-plan...", "info")
+            self.download_language_pack(self.config['lang'], quiet=True)
 
     # --- Fonctions UI/UX ---
     def _(self, text):
@@ -652,12 +657,14 @@ class RepairApp(ctk.CTk):
         lang_map = {"Français": "fr", "English": "en"}
         lang_code = lang_map.get(new_lang_name, "fr")
 
-        if lang_code == self.config.get("lang", "fr"):
+        if lang_code == self.config.get("lang", "fr") and os.path.exists(f"langs/{lang_code}.json"):
             return
 
         self.btn_lang.configure(state="disabled")
         self.log_message(f"Téléchargement du pack de langue '{lang_code}' depuis GitHub...", "info")
+        self.download_language_pack(lang_code, quiet=False)
 
+    def download_language_pack(self, lang_code, quiet=False):
         def thread_target():
             try:
                 if not os.path.exists("langs"):
@@ -678,12 +685,19 @@ class RepairApp(ctk.CTk):
                 with open("config.json", "w", encoding="utf-8") as f:
                     json.dump(self.config, f)
 
-                self.log_message(f"Pack de langue '{lang_code}' appliqué ! Veuillez redémarrer l'application.", "success")
-                messagebox.showinfo("Redémarrage requis", "Le kit de langue a été téléchargé avec succès.\n\nVeuillez redémarrer l'application pour appliquer la traduction.")
+                if not quiet:
+                    self.log_message(f"Pack de langue '{lang_code}' appliqué ! Veuillez redémarrer l'application.", "success")
+                    messagebox.showinfo("Redémarrage requis", "Le kit de langue a été téléchargé avec succès.\n\nVeuillez redémarrer l'application pour appliquer la traduction.")
+                else:
+                    self.log_message(f"Le pack de langue '{lang_code}' a été téléchargé avec succès en arrière-plan.", "success")
             except Exception as e:
-                self.log_message(f"Erreur de téléchargement : {str(e)}\nLe fichier 'langs/{lang_code}.json' existe-t-il sur GitHub ?", "error")
+                if not quiet:
+                    self.log_message(f"Erreur de téléchargement : {str(e)}\nLe fichier 'langs/{lang_code}.json' existe-t-il sur GitHub ?", "error")
+                else:
+                    self.log_message(f"Impossible de télécharger la langue par défaut : {str(e)}", "warning")
             finally:
-                self.btn_lang.configure(state="normal")
+                if not quiet and hasattr(self, 'btn_lang'):
+                    self.btn_lang.configure(state="normal")
 
         threading.Thread(target=thread_target, daemon=True).start()
 
