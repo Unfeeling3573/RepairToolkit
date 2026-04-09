@@ -133,6 +133,48 @@ class SystemRepairManager:
         except Exception as e:
             return f"Erreur lors de la mise en quarantaine : {str(e)}"
 
+    def get_quarantined_files(self) -> list:
+        if not self.is_windows:
+            return ["fake_virus.exe.locked", "script_suspect.vbs.locked"]
+        system_drive = os.environ.get('SystemDrive', 'C:')
+        quarantine_dir = os.path.join(system_drive + '\\', 'RepairToolkit_Quarantine')
+        if not os.path.exists(quarantine_dir):
+            return []
+        try:
+            return os.listdir(quarantine_dir)
+        except:
+            return []
+
+    def restore_quarantined_file(self, filename: str) -> str:
+        if not self.is_windows:
+            time.sleep(1)
+            return f"[Mac Mode] Simulation : {filename} restauré sur le Bureau."
+        try:
+            system_drive = os.environ.get('SystemDrive', 'C:')
+            quarantine_dir = os.path.join(system_drive + '\\', 'RepairToolkit_Quarantine')
+            source = os.path.join(quarantine_dir, filename)
+
+            # On enlève le ".locked" (les 7 derniers caractères) si c'est bien présent
+            original_name = filename[:-7] if filename.endswith('.locked') else filename
+            desktop_dir = os.path.join(os.environ.get('USERPROFILE', ''), 'Desktop')
+            dest = os.path.join(desktop_dir, original_name)
+            shutil.move(source, dest)
+            return f"✅ Fichier restauré sur le Bureau : {original_name}"
+        except Exception as e:
+            return f"❌ Erreur lors de la restauration : {str(e)}"
+
+    def delete_quarantined_file(self, filename: str) -> str:
+        if not self.is_windows:
+            time.sleep(1)
+            return f"[Mac Mode] Simulation : {filename} supprimé définitivement."
+        try:
+            system_drive = os.environ.get('SystemDrive', 'C:')
+            target = os.path.join(system_drive + '\\', 'RepairToolkit_Quarantine', filename)
+            os.remove(target)
+            return f"🗑️ Fichier supprimé définitivement : {filename}"
+        except Exception as e:
+            return f"❌ Erreur lors de la suppression : {str(e)}"
+
     def scan_leftover_pdf_traces(self) -> str:
         if not self.is_windows:
             time.sleep(2)

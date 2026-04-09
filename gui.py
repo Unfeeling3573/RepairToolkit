@@ -15,7 +15,64 @@ import ssl
 from backend import SystemRepairManager
 
 # --- Configuration de l'application ---
-APP_VERSION = "2.0-dev9"
+APP_VERSION = "2.0-dev10"
+
+# --- Interface Gestionnaire de Quarantaine ---
+class QuarantineManagerWindow(ctk.CTkToplevel):
+    def __init__(self, parent, backend):
+        super().__init__(parent)
+        self.title("Gestionnaire de Quarantaine")
+        self.geometry("600x400")
+        self.attributes("-topmost", True)
+        self.backend = backend
+        self.parent_app = parent
+
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+
+        lbl = ctk.CTkLabel(self, text="Fichiers isolés en Quarantaine", font=ctk.CTkFont(size=16, weight="bold"))
+        lbl.grid(row=0, column=0, pady=(20,10))
+
+        self.scroll_frame = ctk.CTkScrollableFrame(self)
+        self.scroll_frame.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
+
+        self.refresh_list()
+
+    def refresh_list(self):
+        # Nettoie la liste actuelle avant de la recharger
+        for widget in self.scroll_frame.winfo_children():
+            widget.destroy()
+
+        files = self.backend.get_quarantined_files()
+        if not files:
+            lbl = ctk.CTkLabel(self.scroll_frame, text="La quarantaine est vide. Aucun fichier suspect.", text_color="gray")
+            lbl.pack(pady=20)
+            return
+
+        for f in files:
+            frame = ctk.CTkFrame(self.scroll_frame, fg_color="transparent")
+            frame.pack(fill="x", pady=5)
+
+            lbl = ctk.CTkLabel(frame, text=f, font=ctk.CTkFont(weight="bold"))
+            lbl.pack(side="left", padx=10)
+
+            btn_del = ctk.CTkButton(frame, text="Détruire", width=80, fg_color="#E74C3C", hover_color="#C0392B", command=lambda name=f: self.delete_file(name))
+            btn_del.pack(side="right", padx=5)
+
+            btn_res = ctk.CTkButton(frame, text="Restaurer", width=80, fg_color="#F39C12", hover_color="#D68910", command=lambda name=f: self.restore_file(name))
+            btn_res.pack(side="right", padx=5)
+
+    def delete_file(self, filename):
+        if messagebox.askyesno("Confirmer", f"Voulez-vous supprimer DÉFINITIVEMENT {filename} ?"):
+            res = self.backend.delete_quarantined_file(filename)
+            self.parent_app.log_message(res, "info")
+            self.refresh_list()
+
+    def restore_file(self, filename):
+        if messagebox.askyesno("Attention", f"Voulez-vous vraiment restaurer {filename} sur le Bureau ?\nAssurez-vous qu'il ne s'agit pas d'un virus !"):
+            res = self.backend.restore_quarantined_file(filename)
+            self.parent_app.log_message(res, "warning")
+            self.refresh_list()
 
 # --- Interface Catalogue de Logiciels ---
 class SoftwareCatalogWindow(ctk.CTkToplevel):
@@ -247,7 +304,8 @@ class RepairApp(ctk.CTk):
         self.btn_pdf_trace = self.create_action_card(self.tab_sec, 0, 1, "Traces PDF Vérolé", "Détecte les doubles extensions et les faux PDF laissés par les virus.", self.start_pdf_trace_scan, **card_themes["danger"])
         self.btn_registry = self.create_action_card(self.tab_sec, 0, 2, "Scan Registre", "Vérifie les clés Run/RunOnce pour débusquer les virus au démarrage.", self.start_registry_scan, **card_themes["danger"])
 
-        self.btn_quarantine = self.create_action_card(self.tab_sec, 1, 0, "Mise en Quarantaine", "Isole et désactive les exécutables suspects dans un dossier sécurisé.", self.start_quarantine, **card_themes["danger"], colspan=3)
+        self.btn_quarantine = self.create_action_card(self.tab_sec, 1, 0, "Mise en Quarantaine", "Isole et désactive les exécutables suspects dans un dossier sécurisé.", self.start_quarantine, **card_themes["danger"], colspan=2)
+        self.btn_manage_quarantine = self.create_action_card(self.tab_sec, 1, 2, "Gérer Quarantaine", "Consulter, restaurer ou supprimer les fichiers isolés.", self.open_quarantine_manager, **card_themes["dark_theme"])
 
         # Bouton Kill Switch (Prend toute la largeur de la ligne en dessous)
         self.btn_kill = self.create_action_card(self.tab_sec, 2, 0, "🚨 KILL SWITCH (Suppression)", "Arrêt d'urgence des processus suspects en mémoire et suppression forcée des charges utiles.", self.start_kill_switch, **card_themes["kill_switch"], colspan=3)
@@ -529,6 +587,9 @@ class RepairApp(ctk.CTk):
     def start_quarantine(self):
         if messagebox.askyesno("Mise en Quarantaine", "Cette action va neutraliser et déplacer les exécutables suspects des dossiers Temp/Téléchargements vers C:\\RepairToolkit_Quarantine.\n\nVoulez-vous continuer ?"):
             self.run_async_task(self.btn_quarantine, self.repair_manager.quarantine_suspicious_files, "Mise en quarantaine des menaces...")
+
+    def open_quarantine_manager(self):
+        QuarantineManagerWindow(self, self.repair_manager)
 
     def start_pdf_trace_scan(self):
         self.run_async_task(self.btn_pdf_trace, self.repair_manager.scan_leftover_pdf_traces, "Recherche de traces laissées par un PDF malveillant...")
