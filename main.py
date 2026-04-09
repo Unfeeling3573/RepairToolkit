@@ -385,7 +385,6 @@ class RepairApp(ctk.CTk):
         # -- Menu latéral (Sidebar) --
         self.sidebar_frame = ctk.CTkFrame(self, width=220, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, rowspan=3, sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(3, weight=1) # Espace vide poussant la version vers le bas
 
         self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="Repair Toolkit", font=ctk.CTkFont(size=24, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(30, 5))
@@ -441,23 +440,30 @@ class RepairApp(ctk.CTk):
         self.tab_net.grid_columnconfigure((0, 1), weight=1)
         self.tab_utils.grid_columnconfigure((0, 1), weight=1)
 
+        # Thèmes de couleurs des cartes extraits de ui_spec.json
+        card_themes = {
+            "dark_theme": {"btn_color": "#2C3E50", "hover_color": "#1A252F"},
+            "danger": {"btn_color": "#8B0000", "hover_color": "#5C0000"},
+            "kill_switch": {"btn_color": "#C0392B", "hover_color": "#922B21"}
+        }
+
         # Création des Cartes d'Actions (UI Premium)
         self.btn_sfc = self.create_action_card(self.tab_sys, 0, 0, "1. Scan SFC", "Vérifie l'intégrité et répare les fichiers système corrompus de Windows.", self.start_sfc_scan)
         self.btn_dism = self.create_action_card(self.tab_sys, 0, 1, "2. Réparer Image (DISM)", "Répare l'image système globale de Windows via Windows Update.", self.start_dism_scan)
         self.btn_restore = self.create_action_card(self.tab_sys, 0, 2, "3. Point Restauration", "Crée une sauvegarde système (recommandé avant réparation).", self.start_restore_point)
         self.btn_explorer = self.create_action_card(self.tab_sys, 1, 0, "Réparer Explorateur", "Redémarre l'explorateur Windows (Menu Démarrer bloqué, icônes invisibles).", self.start_repair_explorer, colspan=3)
 
-        self.btn_telemetry = self.create_action_card(self.tab_opti, 0, 0, "Désactiver Télémétrie", "Bloque la collecte de données et le pistage par Microsoft (DiagTrack).", self.start_disable_telemetry, "#2C3E50", "#1A252F")
-        self.btn_bg_apps = self.create_action_card(self.tab_opti, 0, 1, "Bloquer Apps Arrière-plan", "Empêche les applications inutiles de tourner en tâche de fond.", self.start_disable_background_apps, "#2C3E50", "#1A252F")
+        self.btn_telemetry = self.create_action_card(self.tab_opti, 0, 0, "Désactiver Télémétrie", "Bloque la collecte de données et le pistage par Microsoft (DiagTrack).", self.start_disable_telemetry, **card_themes["dark_theme"])
+        self.btn_bg_apps = self.create_action_card(self.tab_opti, 0, 1, "Bloquer Apps Arrière-plan", "Empêche les applications inutiles de tourner en tâche de fond.", self.start_disable_background_apps, **card_themes["dark_theme"])
 
-        self.btn_onedrive = self.create_action_card(self.tab_opti, 1, 0, "Désactiver OneDrive", "Arrête la synchronisation et retire OneDrive du démarrage.", self.start_disable_onedrive, "#2C3E50", "#1A252F", colspan=2)
+        self.btn_onedrive = self.create_action_card(self.tab_opti, 1, 0, "Désactiver OneDrive", "Arrête la synchronisation et retire OneDrive du démarrage.", self.start_disable_onedrive, **card_themes["dark_theme"], colspan=2)
 
-        self.btn_malware = self.create_action_card(self.tab_sec, 0, 0, "Scan Malware", "Recherche des scripts et exécutables cachés dans Temp et Downloads.", self.start_malware_scan, "#8B0000", "#5C0000")
-        self.btn_pdf_trace = self.create_action_card(self.tab_sec, 0, 1, "Traces PDF Vérolé", "Détecte les doubles extensions et les faux PDF laissés par les virus.", self.start_pdf_trace_scan, "#8B0000", "#5C0000")
-        self.btn_registry = self.create_action_card(self.tab_sec, 0, 2, "Scan Registre", "Vérifie les clés Run/RunOnce pour débusquer les virus au démarrage.", self.start_registry_scan, "#8B0000", "#5C0000")
+        self.btn_malware = self.create_action_card(self.tab_sec, 0, 0, "Scan Malware", "Recherche des scripts et exécutables cachés dans Temp et Downloads.", self.start_malware_scan, **card_themes["danger"])
+        self.btn_pdf_trace = self.create_action_card(self.tab_sec, 0, 1, "Traces PDF Vérolé", "Détecte les doubles extensions et les faux PDF laissés par les virus.", self.start_pdf_trace_scan, **card_themes["danger"])
+        self.btn_registry = self.create_action_card(self.tab_sec, 0, 2, "Scan Registre", "Vérifie les clés Run/RunOnce pour débusquer les virus au démarrage.", self.start_registry_scan, **card_themes["danger"])
 
         # Bouton Kill Switch (Prend toute la largeur de la ligne en dessous)
-        self.btn_kill = self.create_action_card(self.tab_sec, 1, 0, "🚨 KILL SWITCH (Suppression)", "Arrêt d'urgence des processus suspects en mémoire et suppression forcée des charges utiles.", self.start_kill_switch, "#C0392B", "#922B21", colspan=3)
+        self.btn_kill = self.create_action_card(self.tab_sec, 1, 0, "🚨 KILL SWITCH (Suppression)", "Arrêt d'urgence des processus suspects en mémoire et suppression forcée des charges utiles.", self.start_kill_switch, **card_themes["kill_switch"], colspan=3)
 
         self.btn_dns = self.create_action_card(self.tab_net, 0, 0, "Vider Cache DNS", "Résout la plupart des problèmes de connexion aux sites internet.", self.start_flush_dns)
         self.btn_hosts = self.create_action_card(self.tab_net, 0, 1, "Restaurer HOSTS", "Réinitialise le fichier HOSTS pour bloquer les redirections malveillantes.", self.start_hosts_restore)
@@ -493,7 +499,7 @@ class RepairApp(ctk.CTk):
         self.console_textbox.tag_config("error", foreground="#E74C3C")
 
         self.log_message(self._("Bienvenue dans Windows Repair Toolkit - Édition Pro."), "info")
-        self.log_message(self._("Initialisation terminée. Choisissez une action dans les onglets ci-dessus.") + "\n" + "="*70, "success")
+        self.log_message(self._("Initialisation terminée. Choisissez une action dans les onglets ci-dessus.\n======================================================================"), "success")
 
         # --- Téléchargement silencieux si la langue par défaut n'est pas installée ---
         if not os.path.exists(lang_file):

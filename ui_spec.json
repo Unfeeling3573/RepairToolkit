@@ -1,0 +1,451 @@
+{
+  "_meta": {
+    "description": "UI specification for Windows Repair Toolkit — Pro Edition. Use this file to regenerate the full customtkinter interface. Every widget, style value, layout parameter and color is extracted directly from main.py.",
+    "framework": "customtkinter",
+    "python_version": "3.11+",
+    "app_version": "2.0-dev4",
+    "dependencies": ["customtkinter", "fpdf", "pyinstaller"],
+    "entry_class": "RepairApp",
+    "base_class": "ctk.CTk"
+  },
+
+  "window": {
+    "title": "Windows Repair Toolkit - Édition Pro",
+    "geometry": "1000x700",
+    "appearance_mode": "dark",
+    "default_color_theme": "blue",
+    "grid": {
+      "columns": [
+        { "index": 0, "weight": 0, "note": "sidebar — fixed width 220px" },
+        { "index": 1, "weight": 1, "note": "main area — expands" }
+      ],
+      "rows": [
+        { "index": 0, "weight": 3, "note": "tab zone" },
+        { "index": 1, "weight": 0, "note": "status bar" },
+        { "index": 2, "weight": 2, "note": "console log" }
+      ]
+    },
+    "keyboard_shortcuts": [
+      { "binding": "<Control-l>", "command": "clear_logs" },
+      { "binding": "<Control-s>", "command": "export_report" }
+    ]
+  },
+
+  "theme": {
+    "sidebar_bg": "default_ctk_dark",
+    "titlebar_bg": "#1a1a2e",
+    "card_border": "#333333",
+    "console_border": "#333333",
+    "console_font_family": "Consolas",
+    "console_font_size": 13,
+    "version_text_color": "#555555",
+    "hw_label_color": "gray",
+    "sidebar_button_text_color_light": "gray10",
+    "sidebar_button_text_color_dark": "#DCE4EE",
+    "console_tags": {
+      "info":    { "foreground": "#5DADE2" },
+      "success": { "foreground": "#2ECC71" },
+      "warning": { "foreground": "#F1C40F" },
+      "error":   { "foreground": "#E74C3C" }
+    },
+    "action_card_colors": {
+      "default":     { "fg_color": null,      "hover_color": null      },
+      "dark_theme":  { "fg_color": "#2C3E50", "hover_color": "#1A252F" },
+      "danger":      { "fg_color": "#8B0000", "hover_color": "#5C0000" },
+      "kill_switch": { "fg_color": "#C0392B", "hover_color": "#922B21" }
+    }
+  },
+
+  "sidebar": {
+    "widget": "CTkFrame",
+    "width": 220,
+    "corner_radius": 0,
+    "grid": { "row": 0, "column": 0, "rowspan": 3, "sticky": "nsew" },
+    "row_weight": { "index": 7, "weight": 1, "note": "pushes version label to bottom" },
+    "children": [
+      {
+        "id": "logo_label",
+        "widget": "CTkLabel",
+        "text": "Repair Toolkit",
+        "font": { "size": 24, "weight": "bold" },
+        "grid": { "row": 0, "column": 0, "padx": 20, "pady": [30, 5] }
+      },
+      {
+        "id": "hw_label",
+        "widget": "CTkLabel",
+        "text": "dynamic — from SystemRepairManager.get_hardware_info()",
+        "font": { "size": 11 },
+        "text_color": "gray",
+        "justify": "center",
+        "grid": { "row": 1, "column": 0, "padx": 10, "pady": [0, 30] }
+      },
+      {
+        "id": "btn_clear_log",
+        "widget": "CTkButton",
+        "text": "🗑️ Effacer la console",
+        "text_i18n_key": "🗑️ Effacer la console",
+        "command": "clear_logs",
+        "fg_color": "transparent",
+        "border_width": 1,
+        "text_color": ["gray10", "#DCE4EE"],
+        "grid": { "row": 2, "column": 0, "padx": 20, "pady": 10 }
+      },
+      {
+        "id": "btn_export_log",
+        "widget": "CTkButton",
+        "text": "💾 Exporter Rapport",
+        "text_i18n_key": "💾 Exporter Rapport",
+        "command": "export_report",
+        "fg_color": "transparent",
+        "border_width": 1,
+        "text_color": ["gray10", "#DCE4EE"],
+        "grid": { "row": 3, "column": 0, "padx": 20, "pady": 10 }
+      },
+      {
+        "id": "btn_update",
+        "widget": "CTkButton",
+        "text": "🔄 Mises à jour",
+        "text_i18n_key": "🔄 Mises à jour",
+        "command": "check_update",
+        "fg_color": "transparent",
+        "border_width": 1,
+        "text_color": ["gray10", "#DCE4EE"],
+        "grid": { "row": 4, "column": 0, "padx": 20, "pady": 10 }
+      },
+      {
+        "id": "appearance_mode_switch",
+        "widget": "CTkSwitch",
+        "text": "Mode Sombre",
+        "text_i18n_key": "Mode Sombre",
+        "command": "change_appearance_mode_event",
+        "default_state": "selected",
+        "grid": { "row": 5, "column": 0, "padx": 20, "pady": 20 }
+      },
+      {
+        "id": "btn_lang",
+        "widget": "CTkOptionMenu",
+        "values": ["Français", "English"],
+        "command": "change_language_event",
+        "default_value": "Français",
+        "grid": { "row": 6, "column": 0, "padx": 20, "pady": 10 }
+      },
+      {
+        "id": "version_label",
+        "widget": "CTkLabel",
+        "text": "v{APP_VERSION} Pro Edition",
+        "font": { "size": 10 },
+        "text_color": "#555555",
+        "grid": { "row": 8, "column": 0, "pady": 20, "sticky": "s" }
+      }
+    ]
+  },
+
+  "tabview": {
+    "widget": "CTkTabview",
+    "grid": { "row": 0, "column": 1, "padx": 20, "pady": [10, 5], "sticky": "nsew" },
+    "tabs": [
+      {
+        "id": "tab_sys",
+        "label": "🛠️ Système",
+        "i18n_key": "🛠️ Système",
+        "columns": [0, 1, 2],
+        "column_weight": 1,
+        "cards": [
+          {
+            "id": "btn_sfc",
+            "title": "1. Scan SFC",
+            "description": "Vérifie l'intégrité et répare les fichiers système corrompus de Windows.",
+            "command": "start_sfc_scan",
+            "grid": { "row": 0, "col": 0, "colspan": 1 },
+            "color_theme": "default"
+          },
+          {
+            "id": "btn_dism",
+            "title": "2. Réparer Image (DISM)",
+            "description": "Répare l'image système globale de Windows via Windows Update.",
+            "command": "start_dism_scan",
+            "grid": { "row": 0, "col": 1, "colspan": 1 },
+            "color_theme": "default"
+          },
+          {
+            "id": "btn_restore",
+            "title": "3. Point Restauration",
+            "description": "Crée une sauvegarde système (recommandé avant réparation).",
+            "command": "start_restore_point",
+            "grid": { "row": 0, "col": 2, "colspan": 1 },
+            "color_theme": "default"
+          },
+          {
+            "id": "btn_explorer",
+            "title": "Réparer Explorateur",
+            "description": "Redémarre l'explorateur Windows (Menu Démarrer bloqué, icônes invisibles).",
+            "command": "start_repair_explorer",
+            "grid": { "row": 1, "col": 0, "colspan": 3 },
+            "color_theme": "default"
+          }
+        ]
+      },
+      {
+        "id": "tab_opti",
+        "label": "⚡ Optimisation",
+        "i18n_key": "⚡ Optimisation",
+        "columns": [0, 1],
+        "column_weight": 1,
+        "cards": [
+          {
+            "id": "btn_telemetry",
+            "title": "Désactiver Télémétrie",
+            "description": "Bloque la collecte de données et le pistage par Microsoft (DiagTrack).",
+            "command": "start_disable_telemetry",
+            "grid": { "row": 0, "col": 0, "colspan": 1 },
+            "color_theme": "dark_theme"
+          },
+          {
+            "id": "btn_bg_apps",
+            "title": "Bloquer Apps Arrière-plan",
+            "description": "Empêche les applications inutiles de tourner en tâche de fond.",
+            "command": "start_disable_background_apps",
+            "grid": { "row": 0, "col": 1, "colspan": 1 },
+            "color_theme": "dark_theme"
+          },
+          {
+            "id": "btn_onedrive",
+            "title": "Désactiver OneDrive",
+            "description": "Arrête la synchronisation et retire OneDrive du démarrage.",
+            "command": "start_disable_onedrive",
+            "grid": { "row": 1, "col": 0, "colspan": 2 },
+            "color_theme": "dark_theme"
+          }
+        ]
+      },
+      {
+        "id": "tab_sec",
+        "label": "🛡️ Sécurité",
+        "i18n_key": "🛡️ Sécurité",
+        "columns": [0, 1, 2],
+        "column_weight": 1,
+        "cards": [
+          {
+            "id": "btn_malware",
+            "title": "Scan Malware",
+            "description": "Recherche des scripts et exécutables cachés dans Temp et Downloads.",
+            "command": "start_malware_scan",
+            "grid": { "row": 0, "col": 0, "colspan": 1 },
+            "color_theme": "danger"
+          },
+          {
+            "id": "btn_pdf_trace",
+            "title": "Traces PDF Vérolé",
+            "description": "Détecte les doubles extensions et les faux PDF laissés par les virus.",
+            "command": "start_pdf_trace_scan",
+            "grid": { "row": 0, "col": 1, "colspan": 1 },
+            "color_theme": "danger"
+          },
+          {
+            "id": "btn_registry",
+            "title": "Scan Registre",
+            "description": "Vérifie les clés Run/RunOnce pour débusquer les virus au démarrage.",
+            "command": "start_registry_scan",
+            "grid": { "row": 0, "col": 2, "colspan": 1 },
+            "color_theme": "danger"
+          },
+          {
+            "id": "btn_kill",
+            "title": "🚨 KILL SWITCH (Suppression)",
+            "description": "Arrêt d'urgence des processus suspects en mémoire et suppression forcée des charges utiles.",
+            "command": "start_kill_switch",
+            "grid": { "row": 1, "col": 0, "colspan": 3 },
+            "color_theme": "kill_switch"
+          }
+        ]
+      },
+      {
+        "id": "tab_net",
+        "label": "🌐 Réseau & Nettoyage",
+        "i18n_key": "🌐 Réseau & Nettoyage",
+        "columns": [0, 1],
+        "column_weight": 1,
+        "cards": [
+          {
+            "id": "btn_dns",
+            "title": "Vider Cache DNS",
+            "description": "Résout la plupart des problèmes de connexion aux sites internet.",
+            "command": "start_flush_dns",
+            "grid": { "row": 0, "col": 0, "colspan": 1 },
+            "color_theme": "default"
+          },
+          {
+            "id": "btn_hosts",
+            "title": "Restaurer HOSTS",
+            "description": "Réinitialise le fichier HOSTS pour bloquer les redirections malveillantes.",
+            "command": "start_hosts_restore",
+            "grid": { "row": 0, "col": 1, "colspan": 1 },
+            "color_theme": "default"
+          },
+          {
+            "id": "btn_temp",
+            "title": "Nettoyage Temp",
+            "description": "Libère de l'espace disque en supprimant les fichiers temporaires inutiles.",
+            "command": "start_clean_temp",
+            "grid": { "row": 1, "col": 0, "colspan": 1 },
+            "color_theme": "default"
+          },
+          {
+            "id": "btn_downloads",
+            "title": "Vider Téléchargements",
+            "description": "Supprime définitivement le contenu du dossier Téléchargements.",
+            "command": "start_clean_downloads",
+            "grid": { "row": 1, "col": 1, "colspan": 1 },
+            "color_theme": "default"
+          },
+          {
+            "id": "btn_net_reset",
+            "title": "Réinitialiser Réseau",
+            "description": "Renouvelle l'adresse IP et réinitialise la carte réseau (Winsock).",
+            "command": "start_network_reset",
+            "grid": { "row": 2, "col": 0, "colspan": 2 },
+            "color_theme": "default"
+          }
+        ]
+      },
+      {
+        "id": "tab_utils",
+        "label": "🧰 Utilitaires",
+        "i18n_key": "🧰 Utilitaires",
+        "columns": [0, 1],
+        "column_weight": 1,
+        "cards": [
+          {
+            "id": "btn_license",
+            "title": "Clé de Licence",
+            "description": "Récupère la clé de produit Windows originale intégrée à la carte mère.",
+            "command": "start_license_check",
+            "grid": { "row": 0, "col": 0, "colspan": 1 },
+            "color_theme": "default"
+          },
+          {
+            "id": "btn_disk",
+            "title": "Santé des Disques",
+            "description": "Vérifie l'état de santé S.M.A.R.T de vos disques durs et SSD.",
+            "command": "start_disk_check",
+            "grid": { "row": 0, "col": 1, "colspan": 1 },
+            "color_theme": "default"
+          },
+          {
+            "id": "btn_battery",
+            "title": "Rapport Batterie",
+            "description": "Génère un rapport HTML complet sur l'état et l'usure de votre batterie.",
+            "command": "start_battery_report",
+            "grid": { "row": 1, "col": 0, "colspan": 2 },
+            "color_theme": "default"
+          },
+          {
+            "id": "btn_sysinfo",
+            "title": "Infos Système",
+            "description": "Affiche des informations matérielles détaillées (Carte Mère, GPU).",
+            "command": "start_detailed_sysinfo",
+            "grid": { "row": 2, "col": 0, "colspan": 2 },
+            "color_theme": "default"
+          }
+        ]
+      }
+    ]
+  },
+
+  "status_bar": {
+    "widget": "CTkFrame",
+    "height": 30,
+    "fg_color": "transparent",
+    "grid": { "row": 1, "column": 1, "padx": 20, "pady": [5, 5], "sticky": "ew" },
+    "children": [
+      {
+        "id": "status_label",
+        "widget": "CTkLabel",
+        "text": "✅ Prêt à analyser",
+        "i18n_key": "✅ Prêt à analyser",
+        "font": { "weight": "bold", "size": 13 },
+        "pack": { "side": "left", "padx": 5 }
+      },
+      {
+        "id": "progress_bar",
+        "widget": "CTkProgressBar",
+        "mode": "indeterminate",
+        "height": 6,
+        "default_value": 0,
+        "pack": { "side": "right", "fill": "x", "expand": true, "padx": [20, 5] }
+      }
+    ]
+  },
+
+  "console": {
+    "id": "console_textbox",
+    "widget": "CTkTextbox",
+    "font": { "family": "Consolas", "size": 13 },
+    "corner_radius": 10,
+    "border_width": 1,
+    "border_color": "#333333",
+    "grid": { "row": 2, "column": 1, "padx": 20, "pady": [0, 20], "sticky": "nsew" },
+    "tags": {
+      "info":    { "foreground": "#5DADE2" },
+      "success": { "foreground": "#2ECC71" },
+      "warning": { "foreground": "#F1C40F" },
+      "error":   { "foreground": "#E74C3C" }
+    },
+    "startup_messages": [
+      { "text": "Bienvenue dans Windows Repair Toolkit - Édition Pro.", "tag": "info" },
+      { "text": "Initialisation terminée. Choisissez une action dans les onglets ci-dessus.\n======================================================================", "tag": "success" }
+    ]
+  },
+
+  "action_card_template": {
+    "note": "This is the create_action_card() factory method signature and behavior",
+    "method": "create_action_card",
+    "signature": "create_action_card(parent, row, col, title, desc, command, btn_color=None, hover_color=None, colspan=1)",
+    "frame": {
+      "widget": "CTkFrame",
+      "corner_radius": 8,
+      "border_width": 1,
+      "border_color": "#333333",
+      "grid": "row=row, column=col, columnspan=colspan, padx=10, pady=10, sticky='nsew'"
+    },
+    "button": {
+      "widget": "CTkButton",
+      "text": "translated title",
+      "font": { "weight": "bold" },
+      "pack": { "pady": [15, 5], "padx": 15, "fill": "x" },
+      "optional_overrides": ["fg_color", "hover_color"]
+    },
+    "label": {
+      "widget": "CTkLabel",
+      "text": "translated description",
+      "font": { "size": 11 },
+      "text_color": "#AAAAAA",
+      "wraplength": 210,
+      "justify": "center",
+      "pack": { "pady": [0, 15], "padx": 10, "fill": "both", "expand": true }
+    }
+  },
+
+  "i18n": {
+    "supported_languages": ["fr", "en"],
+    "config_file": "config.json",
+    "lang_dir": "langs/",
+    "default_lang": "fr",
+    "translation_keys": {
+      "🗑️ Effacer la console": "🗑️ Clear console",
+      "💾 Exporter Rapport": "💾 Export Report",
+      "🔄 Mises à jour": "🔄 Check Updates",
+      "Mode Sombre": "Dark Mode",
+      "🛠️ Système": "🛠️ System",
+      "⚡ Optimisation": "⚡ Optimization",
+      "🛡️ Sécurité": "🛡️ Security",
+      "🌐 Réseau & Nettoyage": "🌐 Network & Cleanup",
+      "🧰 Utilitaires": "🧰 Utilities",
+      "✅ Prêt à analyser": "✅ Ready to analyze",
+      "1. Scan SFC": "1. SFC Scan",
+      "2. Réparer Image (DISM)": "2. Repair Image (DISM)"
+    }
+  },
+
+  "gemini_prompt": "Using this JSON specification, regenerate the RepairApp class in customtkinter Python. Reproduce: (1) the exact window layout with sidebar + tabview + status bar + console, (2) the create_action_card() factory method, (3) all 5 tabs with their cards at the correct grid positions and color themes from theme.action_card_colors, (4) the console color tags, (5) the i18n translation system. Keep all widget IDs from this spec. Do not regenerate the backend logic (SystemRepairManager), only the UI layer."
+}
