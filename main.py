@@ -328,8 +328,22 @@ class SystemRepairManager:
         except Exception as e:
             return f"Erreur lors de la désactivation des apps en arrière-plan : {str(e)}"
 
+    def disable_onedrive(self) -> str:
+        if not self.is_windows:
+            time.sleep(1)
+            return "[Mac Mode] Simulation : OneDrive désactivé."
+        try:
+            # Arrêter le processus
+            self.execute_command(["taskkill", "/f", "/im", "OneDrive.exe"])
+            # Désactiver via le Registre (Stratégie de groupe)
+            self.execute_command(["reg", "add", "HKLM\\Software\\Policies\\Microsoft\\Windows\\OneDrive", "/v", "DisableFileSyncNGSC", "/t", "REG_DWORD", "/d", "1", "/f"])
+            self.execute_command(["reg", "delete", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", "/v", "OneDrive", "/f"])
+            return "☁️🚫 OneDrive a été arrêté et désactivé du système."
+        except Exception as e:
+            return f"Erreur lors de la désactivation de OneDrive : {str(e)}"
+
 # --- Configuration de l'application ---
-APP_VERSION = "2.0-dev1"
+APP_VERSION = "2.0-dev2"
 
 # --- 2. Interface Graphique (Le Frontend) ---
 class RepairApp(ctk.CTk):
@@ -411,6 +425,8 @@ class RepairApp(ctk.CTk):
 
         self.btn_telemetry = self.create_action_card(self.tab_opti, 0, 0, "Désactiver Télémétrie", "Bloque la collecte de données et le pistage par Microsoft (DiagTrack).", self.start_disable_telemetry, "#2C3E50", "#1A252F")
         self.btn_bg_apps = self.create_action_card(self.tab_opti, 0, 1, "Bloquer Apps Arrière-plan", "Empêche les applications inutiles de tourner en tâche de fond.", self.start_disable_background_apps, "#2C3E50", "#1A252F")
+
+        self.btn_onedrive = self.create_action_card(self.tab_opti, 1, 0, "Désactiver OneDrive", "Arrête la synchronisation et retire OneDrive du démarrage.", self.start_disable_onedrive, "#2C3E50", "#1A252F", colspan=2)
 
         self.btn_malware = self.create_action_card(self.tab_sec, 0, 0, "Scan Malware", "Recherche des scripts et exécutables cachés dans Temp et Downloads.", self.start_malware_scan, "#8B0000", "#5C0000")
         self.btn_pdf_trace = self.create_action_card(self.tab_sec, 0, 1, "Traces PDF Vérolé", "Détecte les doubles extensions et les faux PDF laissés par les virus.", self.start_pdf_trace_scan, "#8B0000", "#5C0000")
@@ -669,6 +685,10 @@ class RepairApp(ctk.CTk):
 
     def start_disable_background_apps(self):
         self.run_async_task(self.btn_bg_apps, self.repair_manager.disable_background_apps, "Désactivation globale des applications en arrière-plan...")
+
+    def start_disable_onedrive(self):
+        if messagebox.askyesno("Optimisation", "Voulez-vous vraiment désactiver complètement OneDrive ?\n\nVos fichiers locaux ne seront plus synchronisés avec le cloud."):
+            self.run_async_task(self.btn_onedrive, self.repair_manager.disable_onedrive, "Désactivation de Microsoft OneDrive...")
 
 # Point d'entrée de l'application
 if __name__ == "__main__":
